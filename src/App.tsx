@@ -1,10 +1,34 @@
-function App() {
+import { Routes, Route } from 'react-router-dom';
+import MainLayout from './components/MainLayout';
 
+// pages
+import DashboardPage from './pages/Dashboard';
+import SobrePage from './pages/Sobre';
+import ContatoPage from './pages/Contato';
+import FaqPage from './pages/FAQ';
+import IntegrantesPage from './pages/Integrantes';
+import LoginPage from './pages/Login';
+import PerfilPage from './pages/Perfil';
+
+
+function App() {
   return (
-    <div>
-      <h1>FlowHome</h1>
-    </div>
-  )
+    <Routes>
+     
+      <Route path="/" element={<MainLayout />}>
+        <Route index element={<DashboardPage />} /> 
+        <Route path="sobre" element={<SobrePage />} />
+        <Route path="contato" element={<ContatoPage />} />
+        <Route path="faq" element={<FaqPage />} />
+        <Route path="integrantes" element={<IntegrantesPage />} />
+      </Route>
+
+      <Route path="/login" element={<LoginPage />} />
+      {/* <Route path="*" element={<ErrorPage />} /> */}
+   
+      <Route path="/perfil" element={<PerfilPage />} />
+    </Routes>
+  );
 }
 
-export default App
+export default App;
