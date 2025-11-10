@@ -95,7 +95,7 @@ const IntegrantesPage = () => {
       imgUrl: '/assets/img/orlando.png',
       githubUrl: 'https://github.com/orlando-IDA',
       linkedinUrl: 'https://www.linkedin.com/in/orlando-gonçalves-de-arruda-934078236/',
-      bio: 'Desenvolvedor full-stack com foco em React e Python.'
+      bio: 'Desenvolvedor back-end com foco em Java e Python.'
     }
   ];
 
