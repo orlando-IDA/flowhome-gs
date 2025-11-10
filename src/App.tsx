@@ -9,6 +9,7 @@ import FaqPage from './pages/FAQ';
 import IntegrantesPage from './pages/Integrantes';
 import LoginPage from './pages/Login';
 import PerfilPage from './pages/Perfil';
+import IntegranteDetail from './pages/IntegranteDetail';
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="contato" element={<ContatoPage />} />
         <Route path="faq" element={<FaqPage />} />
         <Route path="integrantes" element={<IntegrantesPage />} />
+        <Route path="/integrantes/:id" element={<IntegranteDetail />} />
       </Route>
 
       <Route path="/login" element={<LoginPage />} />
