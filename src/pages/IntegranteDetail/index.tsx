@@ -36,7 +36,7 @@ const ArrowLeftIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
   </svg>
 );
 
-const IntegranteDetail = () => {
+const IntegranteDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [integrante, setIntegrante] = useState<IntegranteProps | null>(null);
@@ -65,7 +65,7 @@ const IntegranteDetail = () => {
           imgUrl: '/assets/img/orlando.png',
           githubUrl: 'https://github.com/orlando-IDA',
           linkedinUrl: 'https://www.linkedin.com/in/orlando-gonçalves-de-arruda-934078236/',
-          bio: 'Desenvolvedor full-stack com foco em React e Python.'
+          bio: 'Desenvolvedor back-end com foco em Java e Python.'
         }
       ];
 
