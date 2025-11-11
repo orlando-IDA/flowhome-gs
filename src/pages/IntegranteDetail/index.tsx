@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import type { IntegranteProps } from '../../types/integranteType';
+import { useAppTheme } from '../../context/useAppTheme';
+import { themeClasses } from '../../utils/themeUtils';
 
 const GitHubIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
   <svg 
@@ -41,6 +43,7 @@ const IntegranteDetail: React.FC = () => {
   const navigate = useNavigate();
   const [integrante, setIntegrante] = useState<IntegranteProps | null>(null);
   const [loading, setLoading] = useState(true);
+  const { darkActive } = useAppTheme();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -83,10 +86,13 @@ const IntegranteDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className={`
+        min-h-screen flex items-center justify-center transition-colors duration-300
+        ${themeClasses.bg(darkActive)}
+      `}>
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando informações...</p>
+          <p className={themeClasses.textMuted(darkActive)}>Carregando informações...</p>
         </div>
       </div>
     );
@@ -94,12 +100,23 @@ const IntegranteDetail: React.FC = () => {
 
   if (!integrante) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className={`
+        min-h-screen flex items-center justify-center transition-colors duration-300
+        ${themeClasses.bg(darkActive)}
+      `}>
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Integrante não encontrado</h1>
+          <h1 className={`
+            text-2xl font-bold mb-3
+            ${darkActive ? 'text-red-400' : 'text-red-600'}
+          `}>
+            Integrante não encontrado
+          </h1>
           <button 
             onClick={() => navigate('/integrantes')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className={`
+              px-6 py-3 rounded-lg transition-colors
+              ${themeClasses.btnPrimary(darkActive)}
+            `}
           >
             Voltar para Integrantes
           </button>
@@ -109,50 +126,113 @@ const IntegranteDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className={`
+      min-h-screen py-8 transition-colors duration-300
+      ${themeClasses.bg(darkActive)}
+    `}>
       <div className="container mx-auto px-4">
         <button 
           onClick={() => navigate(-1)}
-          className="mb-6 px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center gap-2"
+          className={`
+            mb-6 px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2
+            ${themeClasses.textMuted(darkActive)}
+            ${darkActive ? 'hover:bg-gray-800 hover:text-white' : 'hover:bg-gray-100 hover:text-gray-900'}
+          `}
         >
           <ArrowLeftIcon />
           Voltar
         </button>
 
-        <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className={`
+          max-w-4xl mx-auto rounded-xl shadow-lg border overflow-hidden transition-colors duration-300
+          ${themeClasses.bg(darkActive)}
+          ${themeClasses.border(darkActive)}
+          ${themeClasses.shadow(darkActive)}
+        `}>
           <div className="md:flex">
-            <div className="md:w-2/5 bg-gray-50 p-8 flex flex-col items-center justify-center border-r border-gray-200">
+            <div className={`
+              md:w-2/5 p-8 flex flex-col items-center justify-center border-r transition-colors duration-300
+              ${darkActive ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}
+            `}>
               <div 
                 className="w-40 h-40 md:w-48 md:h-48 bg-cover bg-center rounded-full border-4 border-blue-100 shadow-inner mb-6"
                 style={{ backgroundImage: `url(${integrante.imgUrl})` }}
               />
-              <h1 className="text-2xl md:text-3xm font-bold text-gray-900 text-center mb-2">{integrante.nome}</h1>
-              <p className="text-blue-600 font-medium text-lg text-center">{integrante.funcao}</p>
+              <h1 className={`
+                text-2xl md:text-3xm font-bold text-center mb-2 transition-colors duration-300
+                ${themeClasses.text(darkActive)}
+              `}>
+                {integrante.nome}
+              </h1>
+              <p className="text-blue-500 font-medium text-lg text-center">{integrante.funcao}</p>
             </div>
 
             <div className="md:w-3/5 p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <h3 className="font-semibold text-gray-600 mb-2">RM</h3>
-                  <p className="text-xl font-bold text-gray-900">{integrante.rm}</p>
+                <div className={`
+                  rounded-lg p-4 border transition-colors duration-300
+                  ${darkActive ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}
+                `}>
+                  <h3 className={`
+                    font-semibold mb-2 transition-colors duration-300
+                    ${themeClasses.textMuted(darkActive)}
+                  `}>
+                    RM
+                  </h3>
+                  <p className={`
+                    text-xl font-bold transition-colors duration-300
+                    ${themeClasses.text(darkActive)}
+                  `}>
+                    {integrante.rm}
+                  </p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <h3 className="font-semibold text-gray-600 mb-2">Turma</h3>
-                  <p className="text-xl font-bold text-gray-900">{integrante.turma}</p>
+                <div className={`
+                  rounded-lg p-4 border transition-colors duration-300
+                  ${darkActive ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}
+                `}>
+                  <h3 className={`
+                    font-semibold mb-2 transition-colors duration-300
+                    ${themeClasses.textMuted(darkActive)}
+                  `}>
+                    Turma
+                  </h3>
+                  <p className={`
+                    text-xl font-bold transition-colors duration-300
+                    ${themeClasses.text(darkActive)}
+                  `}>
+                    {integrante.turma}
+                  </p>
                 </div>
               </div>
 
               <div className="mb-8">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Biografia</h3>
-                <p className="text-gray-700 leading-relaxed">{integrante.bio}</p>
+                <h3 className={`
+                  text-lg font-bold mb-4 transition-colors duration-300
+                  ${themeClasses.text(darkActive)}
+                `}>
+                  Biografia
+                </h3>
+                <p className={`
+                  leading-relaxed transition-colors duration-300
+                  ${themeClasses.textMuted(darkActive)}
+                `}>
+                  {integrante.bio}
+                </p>
               </div>
 
-              <div className="flex justify-center gap-4 pt-6 border-t border-gray-200">
+              <div className={`
+                flex justify-center gap-4 pt-6 border-t transition-colors duration-300
+                ${themeClasses.border(darkActive)}
+              `}>
                 <a 
                   href={integrante.githubUrl} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="p-3 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                  className={`
+                    p-3 rounded-lg transition-all duration-200
+                    ${themeClasses.textMuted(darkActive)}
+                    ${darkActive ? 'hover:text-white hover:bg-gray-700' : 'hover:text-gray-900 hover:bg-gray-100'}
+                  `}
                 >
                   <GitHubIcon />
                 </a>
@@ -160,7 +240,11 @@ const IntegranteDetail: React.FC = () => {
                   href={integrante.linkedinUrl} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="p-3 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                  className={`
+                    p-3 rounded-lg transition-all duration-200
+                    ${themeClasses.textMuted(darkActive)}
+                    ${darkActive ? 'hover:text-blue-400 hover:bg-gray-700' : 'hover:text-blue-600 hover:bg-gray-100'}
+                  `}
                 >
                   <LinkedInIcon />
                 </a>
