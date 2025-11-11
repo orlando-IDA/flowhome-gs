@@ -18,8 +18,8 @@ export const themeClasses = {
   // Botões primários
   btnPrimary: (darkActive: boolean) => 
     darkActive 
-      ? 'bg-blue-500 text-white hover:bg-blue-600 border-blue-500' 
-      : 'text-blue-600 border-blue-500 hover:bg-blue-500 hover:text-white',
+      ? 'bg-blue-600 text-white hover:bg-blue-700 border border-blue-600 shadow-md' 
+      : 'bg-white text-blue-600 border-2 border-blue-600 hover:bg-blue-600 hover:text-white shadow-md',
   
   // Botões secundários
   btnSecondary: (darkActive: boolean) => 

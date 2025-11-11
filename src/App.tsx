@@ -10,6 +10,7 @@ import IntegrantesPage from './pages/Integrantes';
 import LoginPage from './pages/Login';
 import PerfilPage from './pages/Perfil';
 import IntegranteDetail from './pages/IntegranteDetail';
+import Error404 from './pages/Error';
 
 
 function App() {
@@ -26,7 +27,7 @@ function App() {
       </Route>
 
       <Route path="/login" element={<LoginPage />} />
-      {/* <Route path="*" element={<ErrorPage />} /> */}
+      <Route path="*" element={<Error404 />} />
    
       <Route path="/perfil" element={<PerfilPage />} />
     </Routes>
