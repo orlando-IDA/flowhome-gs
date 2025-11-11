@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { IntegranteProps } from '../../types/integranteType';
+import { useAppTheme } from '../../context/useAppTheme';
+import { themeClasses } from '../../utils/themeUtils';
 
 const GitHubIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
   <svg 
@@ -24,12 +26,20 @@ const LinkedInIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
 );
 
 const IntegranteCard = ({ id, nome, rm, turma, funcao, imgUrl, githubUrl, linkedinUrl }: IntegranteProps) => {
+  const { darkActive } = useAppTheme();
+
   return (
     <Link 
       to={`/integrantes/${id}`}
       className="block transition-all duration-300 hover:scale-105"
     >
-      <div className="bg-white text-gray-900 rounded-xl w-[280px] md:w-[300px] aspect-3/4 p-12 flex flex-col items-center justify-between text-center shadow-lg hover:shadow-xl border border-gray-200 transition-all duration-300">
+      <div className={`
+        rounded-xl w-[280px] md:w-[300px] aspect-3/4 p-12 flex flex-col items-center justify-between text-center shadow-lg hover:shadow-xl border transition-all duration-300
+        ${themeClasses.bg(darkActive)}
+        ${themeClasses.border(darkActive)}
+        ${themeClasses.text(darkActive)}
+        ${themeClasses.shadow(darkActive)}
+      `}>
         <div className="flex flex-col items-center gap-4">
           <div 
             className="w-28 h-28 md:w-32 md:h-32 bg-cover bg-center rounded-full border-4 border-blue-100 shadow-inner"
@@ -37,21 +47,26 @@ const IntegranteCard = ({ id, nome, rm, turma, funcao, imgUrl, githubUrl, linked
           />
           <div className="flex flex-col gap-2">
             <h3 className="text-lg md:text-xl font-semibold">{nome}</h3>
-            <div className="flex flex-col gap-1 text-sm text-gray-600">
-              <p>{`RM: ${rm} | ${turma}`}</p>
-              <p className="font-medium text-blue-600">{funcao}</p>
+            <div className="flex flex-col gap-1 text-sm">
+              <p className={themeClasses.textMuted(darkActive)}>{`RM: ${rm} | ${turma}`}</p>
+              <p className="font-medium text-blue-500">{funcao}</p>
             </div>
           </div>
         </div>
 
-        <div className="w-full pt-4 border-t border-gray-200">
+        <div className={`w-full pt-4 border-t ${themeClasses.border(darkActive)}`}>
           <div className="flex items-center justify-center gap-4">
             <a 
               href={githubUrl} 
               target="_blank" 
               rel="noopener noreferrer" 
               aria-label="GitHub"
-              className="p-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200"
+              className={`
+                p-2 rounded-lg transition-all duration-200
+                ${themeClasses.textMuted(darkActive)}
+                hover:text-gray-900 hover:bg-gray-100
+                ${darkActive ? 'dark:hover:text-white dark:hover:bg-gray-700' : ''}
+              `}
               onClick={(e) => e.stopPropagation()}
             >
               <GitHubIcon />
@@ -61,7 +76,12 @@ const IntegranteCard = ({ id, nome, rm, turma, funcao, imgUrl, githubUrl, linked
               target="_blank" 
               rel="noopener noreferrer" 
               aria-label="LinkedIn"
-              className="p-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+              className={`
+                p-2 rounded-lg transition-all duration-200
+                ${themeClasses.textMuted(darkActive)}
+                hover:text-blue-600 hover:bg-gray-100
+                ${darkActive ? 'dark:hover:text-blue-400 dark:hover:bg-gray-700' : ''}
+              `}
               onClick={(e) => e.stopPropagation()}
             >
               <LinkedInIcon />
@@ -74,6 +94,8 @@ const IntegranteCard = ({ id, nome, rm, turma, funcao, imgUrl, githubUrl, linked
 };
 
 const IntegrantesPage = () => {
+  const { darkActive } = useAppTheme();
+
   const integrantes: IntegranteProps[] = [
     {
       id: '1',
@@ -100,10 +122,16 @@ const IntegrantesPage = () => {
   ];
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12">
+    <main className={`
+      min-h-screen py-12 transition-colors duration-300
+      ${themeClasses.bg(darkActive)}
+    `}>
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h1 className={`
+            text-3xl md:text-4xl font-bold mb-4
+            ${themeClasses.text(darkActive)}
+          `}>
             Nossa Equipe
           </h1>
         </div>
@@ -117,15 +145,29 @@ const IntegrantesPage = () => {
           ))}
         </section>
 
-        <div className="text-center mt-16 bg-white rounded-xl p-6 shadow-lg border border-gray-200 max-w-2xl mx-auto">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
+        <div className={`
+          text-center mt-16 rounded-xl p-6 max-w-2xl mx-auto border transition-colors duration-300
+          ${themeClasses.bg(darkActive)}
+          ${themeClasses.border(darkActive)}
+          ${themeClasses.shadow(darkActive)}
+        `}>
+          <h2 className={`
+            text-xl font-bold mb-4
+            ${themeClasses.text(darkActive)}
+          `}>
             Sobre o Projeto
           </h2>
-          <p className="text-gray-700 text-base mb-4">
+          <p className={`
+            text-base mb-4
+            ${themeClasses.textMuted(darkActive)}
+          `}>
             O FlowHome foi desenvolvido para a Global Solution da FIAP,
             com o objetivo de explorar o tema "O Futuro do Trabalho".
           </p>
-          <p className="text-gray-700 text-base">
+          <p className={`
+            text-base
+            ${themeClasses.textMuted(darkActive)}
+          `}>
             Nossa missão é promover o bem-estar,
             produtividade e a saúde mental na era do trabalho remoto e híbrido.
           </p>

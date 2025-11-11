@@ -3,6 +3,8 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { useAppTheme } from '../../context/useAppTheme';
+import { themeClasses } from '../../utils/themeUtils';
 
 const registerSchema = z.object({
   nome: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres.'),
@@ -22,6 +24,7 @@ interface RegisterFormProps {
 
 export function RegisterForm({ onToggleView }: RegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { darkActive } = useAppTheme();
 
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterSchema>({
     resolver: zodResolver(registerSchema),
@@ -35,6 +38,7 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
       codigoEquipe: '',
     },
   });
+
   const onSubmit = async (data: RegisterSchema) => {
     setIsLoading(true);
     console.log('Dados do Cadastro (Visual):', data);
@@ -45,18 +49,34 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
     setIsLoading(false);
     onToggleView(); 
   };
+
   const inputClass = (hasError: boolean) => `
-    flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm 
+    flex h-10 w-full rounded-md border px-3 py-2 text-sm 
     placeholder:text-neutral-500 
     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-    ${hasError ? 'border-red-500 ring-red-500' : ''}
+    ${hasError ? 'border-red-500 ring-red-500' : themeClasses.border(darkActive)}
+    ${themeClasses.bg(darkActive)}
+    ${themeClasses.text(darkActive)}
   `;
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-neutral-200">
+    <div className={`
+      rounded-xl shadow-lg border transition-colors duration-300
+      ${themeClasses.bg(darkActive)}
+      ${themeClasses.border(darkActive)}
+      ${themeClasses.shadow(darkActive)}
+    `}>
       <div className="p-6">
-        <h2 className="text-2xl font-semibold text-neutral-900">Criar nova conta</h2>
-        <p className="text-neutral-600 mt-1">
+        <h2 className={`
+          text-2xl font-semibold transition-colors duration-300
+          ${themeClasses.text(darkActive)}
+        `}>
+          Criar nova conta
+        </h2>
+        <p className={`
+          mt-1 transition-colors duration-300
+          ${themeClasses.textMuted(darkActive)}
+        `}>
           Preencha seus dados para se registrar.
         </p>
       </div>
@@ -64,7 +84,15 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-4 max-h-[60vh] overflow-y-auto px-6 py-2">
           <div className="space-y-2">
-            <label htmlFor="nome" className="block text-sm font-medium text-neutral-700">Nome Completo</label>
+            <label 
+              htmlFor="nome" 
+              className={`
+                block text-sm font-medium transition-colors duration-300
+                ${themeClasses.text(darkActive)}
+              `}
+            >
+              Nome Completo
+            </label>
             <input
               id="nome"
               type="text"
@@ -75,7 +103,15 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
             {errors.nome && <p className="text-sm font-medium text-red-600">{errors.nome.message}</p>}
           </div>
           <div className="space-y-2">
-            <label htmlFor="cpf" className="block text-sm font-medium text-neutral-700">CPF</label>
+            <label 
+              htmlFor="cpf" 
+              className={`
+                block text-sm font-medium transition-colors duration-300
+                ${themeClasses.text(darkActive)}
+              `}
+            >
+              CPF
+            </label>
             <input
               id="cpf"
               type="text"
@@ -86,7 +122,15 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
             {errors.cpf && <p className="text-sm font-medium text-red-600">{errors.cpf.message}</p>}
           </div>
           <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-neutral-700">E-mail</label>
+            <label 
+              htmlFor="email" 
+              className={`
+                block text-sm font-medium transition-colors duration-300
+                ${themeClasses.text(darkActive)}
+              `}
+            >
+              E-mail
+            </label>
             <input
               id="email"
               type="email"
@@ -97,7 +141,15 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
             {errors.email && <p className="text-sm font-medium text-red-600">{errors.email.message}</p>}
           </div>
           <div className="space-y-2">
-            <label htmlFor="telefone" className="block text-sm font-medium text-neutral-700">Telefone</label>
+            <label 
+              htmlFor="telefone" 
+              className={`
+                block text-sm font-medium transition-colors duration-300
+                ${themeClasses.text(darkActive)}
+              `}
+            >
+              Telefone
+            </label>
             <input
               id="telefone"
               type="tel"
@@ -108,7 +160,15 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
             {errors.telefone && <p className="text-sm font-medium text-red-600">{errors.telefone.message}</p>}
           </div>
           <div className="space-y-2">
-            <label htmlFor="dataNascimento" className="block text-sm font-medium text-neutral-700">Data de Nascimento</label>
+            <label 
+              htmlFor="dataNascimento" 
+              className={`
+                block text-sm font-medium transition-colors duration-300
+                ${themeClasses.text(darkActive)}
+              `}
+            >
+              Data de Nascimento
+            </label>
             <input
               id="dataNascimento"
               type="date"
@@ -118,7 +178,15 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
             {errors.dataNascimento && <p className="text-sm font-medium text-red-600">{errors.dataNascimento.message}</p>}
           </div>
           <div className="space-y-2">
-            <label htmlFor="senha" className="block text-sm font-medium text-neutral-700">Senha</label>
+            <label 
+              htmlFor="senha" 
+              className={`
+                block text-sm font-medium transition-colors duration-300
+                ${themeClasses.text(darkActive)}
+              `}
+            >
+              Senha
+            </label>
             <input
               id="senha"
               type="password"
@@ -129,7 +197,15 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
             {errors.senha && <p className="text-sm font-medium text-red-600">{errors.senha.message}</p>}
           </div>
           <div className="space-y-2">
-            <label htmlFor="codigoEquipe" className="block text-sm font-medium text-neutral-700">Código da Equipe (Opcional)</label>
+            <label 
+              htmlFor="codigoEquipe" 
+              className={`
+                block text-sm font-medium transition-colors duration-300
+                ${themeClasses.text(darkActive)}
+              `}
+            >
+              Código da Equipe (Opcional)
+            </label>
             <input
               id="codigoEquipe"
               type="text"
@@ -137,7 +213,10 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
               className={inputClass(!!errors.codigoEquipe)}
               {...register("codigoEquipe")}
             />
-            <p className="text-sm text-neutral-600">
+            <p className={`
+              text-sm transition-colors duration-300
+              ${themeClasses.textMuted(darkActive)}
+            `}>
               Se você vai criar uma equipe, deixe em branco.
             </p>
             {errors.codigoEquipe && <p className="text-sm font-medium text-red-600">{errors.codigoEquipe.message}</p>}

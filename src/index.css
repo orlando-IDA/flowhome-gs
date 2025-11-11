@@ -12,3 +12,26 @@
 @theme {
   --font-sans: 'Poppins', sans-serif;
 }
+
+@layer base {
+  body {
+    @apply transition-colors duration-200;
+  }
+
+  .theme-dark {
+    @apply bg-neutral-950 text-neutral-100;
+  }
+
+  .theme-light {
+    @apply bg-white text-neutral-900;
+  }
+}
+
+@layer utilities {
+  .backdrop-blur-md {
+    backdrop-filter: blur(12px);
+  }
+  .backdrop-blur-lg {
+    backdrop-filter: blur(16px);
+  }
+}
