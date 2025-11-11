@@ -1,24 +1,23 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  FaBoxArchive, 
-  FaUsers, 
-  FaEnvelope, 
-  FaBars,
-  FaXmark,
-  FaQuestion
+  FaBoxArchive, FaUsers, FaEnvelope, FaBars, FaXmark, FaQuestion,
+  FaMoon, FaSun
 } from 'react-icons/fa6';
+import { useAppTheme } from '../context/useAppTheme';
+import { themeClasses } from '../utils/themeUtils';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { darkActive, switchTheme } = useAppTheme();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const baseLinkStyle = "relative font-medium transition-colors duration-300 py-2 after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:bg-blue-600 after:transition-all after:duration-300";
-  const activeLinkStyle = "text-blue-600 font-bold after:w-full";
-  const inactiveLinkStyle = "text-gray-600 hover:text-blue-600 after:w-0 hover:after:w-full";
+  const baseLinkStyle = "relative font-medium transition-colors duration-300 py-2 after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:bg-blue-500 after:transition-all after:duration-300";
+  const activeLinkStyle = "text-blue-500 font-bold after:w-full";
+  const inactiveLinkStyle = "hover:text-blue-500 after:w-0 hover:after:w-full";
 
   const NavLinkIcon = ({ to, text, icon }: { to: string, text: string, icon: React.ReactNode }) => (
     <NavLink 
@@ -32,8 +31,24 @@ const Header: React.FC = () => {
     </NavLink>
   );
 
+  const MobileNavLink = ({ to, text, icon }: { to: string, text: string, icon: React.ReactNode }) => (
+     <NavLink 
+      to={to} 
+      className={({ isActive }) => `block py-2 ${isActive ? "text-blue-500 font-bold" : ""}`} 
+      onClick={() => setIsMenuOpen(false)}
+    >
+      <span className="flex items-center gap-3">{icon} {text}</span>
+    </NavLink>
+  );
+
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
+    <header className={`
+      sticky top-0 z-50 transition-all duration-300 border-b
+      ${themeClasses.bg(darkActive)}
+      ${themeClasses.border(darkActive)}
+      ${themeClasses.text(darkActive)}
+      ${themeClasses.shadow(darkActive)}
+    `}>
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           
@@ -41,7 +56,7 @@ const Header: React.FC = () => {
             <img 
               src="/flowhome-logo.png" 
               alt="Logo FlowHome" 
-              className="w-32 h-12 md:w-40 md:h-16 object-contain" 
+              className={`w-32 h-12 md:w-40 md:h-16 object-contain ${themeClasses.logo(darkActive)}`} 
             />
           </NavLink>
 
@@ -53,16 +68,30 @@ const Header: React.FC = () => {
               <li><NavLinkIcon to="/faq" text="FAQ" icon={<FaQuestion />} /></li>
             </ul>
             
+            <button
+              onClick={switchTheme}
+              className={`
+                p-3 rounded-full transition-all duration-300
+                ${themeClasses.btnSecondary(darkActive)}
+              `}
+              aria-label="Alternar tema"
+            >
+              {darkActive ? <FaSun className="w-5 h-5" /> : <FaMoon className="w-5 h-5" />}
+            </button>
+            
             <NavLink 
               to="/login"
-              className="px-4 py-2 text-sm font-semibold text-blue-600 bg-white border border-blue-500 rounded-md hover:bg-blue-500 hover:text-white transition-colors duration-300"
+              className={`
+                px-4 py-2 text-sm font-semibold rounded-md transition-colors duration-300 border
+                ${themeClasses.btnPrimary(darkActive)}
+              `}
             >
               LOGIN
             </NavLink>
           </nav>
 
           <button 
-            className="md:hidden text-gray-700 focus:outline-none"
+            className={`md:hidden focus:outline-none ${themeClasses.text(darkActive)}`}
             onClick={toggleMenu}
             aria-label="Abrir menu"
           >
@@ -71,31 +100,44 @@ const Header: React.FC = () => {
         </div>
 
         {isMenuOpen && (
-          <nav className="md:hidden mt-4 pt-4 border-t border-gray-200">
+          <nav className={`md:hidden mt-4 pt-4 border-t ${themeClasses.border(darkActive)}`}>
             <ul className="flex flex-col gap-4">
-              <li>
-                <NavLink to="/sobre" className={({ isActive }) => `block py-2 ${isActive ? "text-blue-600 font-bold" : "text-gray-700"}`} onClick={() => setIsMenuOpen(false)}>
-                  <span className="flex items-center gap-3"><FaBoxArchive /> SOBRE</span>
-                </NavLink>
+              <li><MobileNavLink to="/sobre" text="SOBRE" icon={<FaBoxArchive />} /></li>
+              <li><MobileNavLink to="/integrantes" text="INTEGRANTES" icon={<FaUsers />} /></li>
+              <li><MobileNavLink to="/contato" text="CONTATO" icon={<FaEnvelope />} /></li>
+              <li><MobileNavLink to="/faq" text="FAQ" icon={<FaQuestion />} /></li>
+              
+              <li className={`pt-2 border-t ${themeClasses.border(darkActive)}`}>
+                <button
+                  onClick={() => {
+                    switchTheme();
+                    setIsMenuOpen(false);
+                  }}
+                  className={`
+                    w-full flex items-center justify-center gap-3 py-3 rounded-md transition-colors
+                    ${themeClasses.btnSecondary(darkActive)}
+                  `}
+                >
+                  {darkActive ? (
+                    <>
+                      <FaSun className="w-5 h-5" />
+                      <span>Tema Claro</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaMoon className="w-5 h-5" />
+                      <span>Tema Escuro</span>
+                    </>
+                  )}
+                </button>
               </li>
-              <li>
-                <NavLink to="/integrantes" className={({ isActive }) => `block py-2 ${isActive ? "text-blue-600 font-bold" : "text-gray-700"}`} onClick={() => setIsMenuOpen(false)}>
-                  <span className="flex items-center gap-3"><FaUsers /> INTEGRANTES</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/contato" className={({ isActive }) => `block py-2 ${isActive ? "text-blue-600 font-bold" : "text-gray-700"}`} onClick={() => setIsMenuOpen(false)}>
-                  <span className="flex items-center gap-3"><FaEnvelope /> CONTATO</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/faq" className={({ isActive }) => `block py-2 ${isActive ? "text-blue-600 font-bold" : "text-gray-700"}`} onClick={() => setIsMenuOpen(false)}>
-                  <span className="flex items-center gap-3"><FaQuestion /> FAQ</span>
-                </NavLink>
-              </li>
-              <li className="pt-4 border-t border-gray-100">
+              
+              <li className={`pt-2 border-t ${themeClasses.border(darkActive)}`}>
                 <NavLink to="/login" className="w-full" onClick={() => setIsMenuOpen(false)}>
-                  <button className="w-full px-4 py-2 font-semibold text-blue-600 bg-white border border-blue-500 rounded-md hover:bg-blue-500 hover:text-white transition-colors duration-300">
+                  <button className={`
+                    w-full px-4 py-3 font-semibold rounded-md transition-colors duration-300 border
+                    ${themeClasses.btnPrimary(darkActive)}
+                  `}>
                     LOGIN
                   </button>
                 </NavLink>
