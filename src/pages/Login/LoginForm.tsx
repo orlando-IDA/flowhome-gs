@@ -4,6 +4,8 @@ import * as z from 'zod';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom'; 
+import { useAppTheme } from '../../context/useAppTheme';
+import { themeClasses } from '../../utils/themeUtils';
 
 const loginSchema = z.object({
   cpf: z.string().length(11, 'CPF deve conter exatamente 11 dígitos.'),
@@ -18,6 +20,7 @@ interface LoginFormProps {
 
 export function LoginForm({ onToggleView }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { darkActive } = useAppTheme();
   const navigate = useNavigate(); 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginSchema>({
     resolver: zodResolver(loginSchema),
@@ -35,11 +38,24 @@ export function LoginForm({ onToggleView }: LoginFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-neutral-200">
+    <div className={`
+      rounded-xl shadow-lg border transition-colors duration-300
+      ${themeClasses.bg(darkActive)}
+      ${themeClasses.border(darkActive)}
+      ${themeClasses.shadow(darkActive)}
+    `}>
       
       <div className="p-6">
-        <h2 className="text-2xl font-semibold text-neutral-900">Acessar Plataforma</h2>
-        <p className="text-neutral-600 mt-1">
+        <h2 className={`
+          text-2xl font-semibold transition-colors duration-300
+          ${themeClasses.text(darkActive)}
+        `}>
+          Acessar Plataforma
+        </h2>
+        <p className={`
+          mt-1 transition-colors duration-300
+          ${themeClasses.textMuted(darkActive)}
+        `}>
           Insira seu CPF e senha para continuar.
         </p>
       </div>
@@ -49,7 +65,10 @@ export function LoginForm({ onToggleView }: LoginFormProps) {
           <div className="space-y-2">
             <label 
               htmlFor="cpf" 
-              className="block text-sm font-medium text-neutral-700"
+              className={`
+                block text-sm font-medium transition-colors duration-300
+                ${themeClasses.text(darkActive)}
+              `}
             >
               CPF
             </label>
@@ -57,12 +76,8 @@ export function LoginForm({ onToggleView }: LoginFormProps) {
               id="cpf"
               type="text"
               placeholder="000.000.000-00"
-              className={`
-                flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm 
-                placeholder:text-neutral-500 
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-                ${errors.cpf ? 'border-red-500 ring-red-500' : ''}
-              `}
+              // AQUI ESTÁ A MUDANÇA - usando a nova função input
+              className={themeClasses.input(darkActive, !!errors.cpf)}
               {...register("cpf")}
             />
             {errors.cpf && (
@@ -74,7 +89,10 @@ export function LoginForm({ onToggleView }: LoginFormProps) {
           <div className="space-y-2">
             <label 
               htmlFor="senha" 
-              className="block text-sm font-medium text-neutral-700"
+              className={`
+                block text-sm font-medium transition-colors duration-300
+                ${themeClasses.text(darkActive)}
+              `}
             >
               Senha
             </label>
@@ -82,12 +100,8 @@ export function LoginForm({ onToggleView }: LoginFormProps) {
               id="senha"
               type="password"
               placeholder="••••••••"
-              className={`
-                flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm 
-                placeholder:text-neutral-500 
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-                ${errors.senha ? 'border-red-500 ring-red-500' : ''}
-              `}
+              // AQUI ESTÁ A MUDANÇA - usando a nova função input
+              className={themeClasses.input(darkActive, !!errors.senha)}
               {...register("senha")}
             />
             {errors.senha && (
