@@ -1,9 +1,21 @@
-export interface User {
-  id: number;
+export interface ILoginRequest {
+  login: string;
+  senha: string;
+}
+
+export interface ICadastroRequest {
   nome: string;
   cpf: string;
   email: string;
   telefone: string;
-  isGestor: boolean;
+  dtNascimento: string;
+  senha: string;
+}
+
+export interface IUserResponse {
+  idUsuario: number;
+  nome: string;
+  email: string;
   idEquipe: number | null;
+  isGestor: boolean;
 }
