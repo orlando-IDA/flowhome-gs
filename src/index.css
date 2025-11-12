@@ -19,7 +19,7 @@
   }
 
   .theme-dark {
-    @apply bg-neutral-950 text-neutral-100;
+    @apply bg-gray-900 text-neutral-100;
   }
 
   .theme-light {
