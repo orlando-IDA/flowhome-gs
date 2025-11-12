@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  FaBoxArchive, FaUsers, FaEnvelope, FaBars, FaXmark, FaQuestion,
-  FaMoon, FaSun
+  FaListCheck, FaUsers, FaFolder, FaBars, FaXmark, FaMoon, FaSun,
+  FaHouse, FaUser, FaSignal
 } from 'react-icons/fa6';
 import { useAppTheme } from '../context/useAppTheme';
 import { themeClasses } from '../utils/themeUtils';
@@ -31,15 +31,32 @@ const Header: React.FC = () => {
     </NavLink>
   );
 
-  const MobileNavLink = ({ to, text, icon }: { to: string, text: string, icon: React.ReactNode }) => (
-     <NavLink 
-      to={to} 
-      className={({ isActive }) => `block py-2 ${isActive ? "text-blue-500 font-bold" : ""}`} 
-      onClick={() => setIsMenuOpen(false)}
-    >
-      <span className="flex items-center gap-3">{icon} {text}</span>
-    </NavLink>
-  );
+  const MobileNavLink = ({ to, text, icon }: { to: string, text: string, icon: React.ReactNode }) => {
+    const { darkActive } = useAppTheme();
+    
+    return (
+      <NavLink 
+        to={to} 
+        className={({ isActive }) => `
+          flex items-center gap-4 p-4 rounded-xl transition-all duration-300
+          ${isActive 
+            ? 'bg-blue-500 text-white shadow-lg transform scale-105' 
+            : `${themeClasses.text(darkActive)} ${darkActive ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`
+          }
+        `} 
+        onClick={() => setIsMenuOpen(false)}
+      >
+        {({ isActive }) => (
+          <>
+            <div className={`p-2 rounded-lg ${isActive ? 'bg-white/20' : darkActive ? 'bg-gray-700' : 'bg-gray-100'}`}>
+              {icon}
+            </div>
+            <span className="text-lg font-medium">{text}</span>
+          </>
+        )}
+      </NavLink>
+    );
+  };
 
   return (
     <header className={`
@@ -52,7 +69,7 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           
-          <NavLink to="/">
+          <NavLink to="/" className="flex items-center gap-3">
             <img 
               src="/flowhome-logo.png" 
               alt="Logo FlowHome" 
@@ -62,10 +79,11 @@ const Header: React.FC = () => {
 
           <nav className="hidden md:flex items-center gap-6 lg:gap-8">
             <ul className="flex items-center gap-6 lg:gap-8">
-              <li><NavLinkIcon to="/sobre" text="SOBRE" icon={<FaBoxArchive />} /></li>
-              <li><NavLinkIcon to="/integrantes" text="INTEGRANTES" icon={<FaUsers />} /></li>
-              <li><NavLinkIcon to="/contato" text="CONTATO" icon={<FaEnvelope />} /></li>
-              <li><NavLinkIcon to="/faq" text="FAQ" icon={<FaQuestion />} /></li>
+              <li><NavLinkIcon to="/tarefas" text="TAREFAS" icon={<FaListCheck />} /></li>
+              <li><NavLinkIcon to="/equipes" text="EQUIPES" icon={<FaUsers />} /></li>
+              <li><NavLinkIcon to="/categorias" text="CATEGORIAS" icon={<FaFolder />} /></li>
+              <li><NavLinkIcon to="/sobre" text="SOBRE" icon={<FaHouse />} /></li>
+              <li><NavLinkIcon to="/integrantes" text="INTEGRANTES" icon={<FaUser />} /></li>
             </ul>
             
             <button
@@ -91,7 +109,7 @@ const Header: React.FC = () => {
           </nav>
 
           <button 
-            className={`md:hidden focus:outline-none ${themeClasses.text(darkActive)}`}
+            className={`md:hidden p-2 rounded-lg transition-all duration-300 ${darkActive ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
             onClick={toggleMenu}
             aria-label="Abrir menu"
           >
@@ -100,50 +118,79 @@ const Header: React.FC = () => {
         </div>
 
         {isMenuOpen && (
-          <nav className={`md:hidden mt-4 pt-4 border-t ${themeClasses.border(darkActive)}`}>
-            <ul className="flex flex-col gap-4">
-              <li><MobileNavLink to="/sobre" text="SOBRE" icon={<FaBoxArchive />} /></li>
-              <li><MobileNavLink to="/integrantes" text="INTEGRANTES" icon={<FaUsers />} /></li>
-              <li><MobileNavLink to="/contato" text="CONTATO" icon={<FaEnvelope />} /></li>
-              <li><MobileNavLink to="/faq" text="FAQ" icon={<FaQuestion />} /></li>
-              
-              <li className={`pt-2 border-t ${themeClasses.border(darkActive)}`}>
-                <button
-                  onClick={() => {
-                    switchTheme();
-                    setIsMenuOpen(false);
-                  }}
-                  className={`
-                    w-full flex items-center justify-center gap-3 py-3 rounded-md transition-colors
-                    ${themeClasses.btnSecondary(darkActive)}
-                  `}
-                >
-                  {darkActive ? (
-                    <>
-                      <FaSun className="w-5 h-5" />
-                      <span>Tema Claro</span>
-                    </>
-                  ) : (
-                    <>
-                      <FaMoon className="w-5 h-5" />
-                      <span>Tema Escuro</span>
-                    </>
-                  )}
-                </button>
-              </li>
-              
-              <li className={`pt-2 border-t ${themeClasses.border(darkActive)}`}>
-                <NavLink to="/login" className="w-full" onClick={() => setIsMenuOpen(false)}>
-                  <button className={`
-                    w-full px-4 py-3 font-semibold rounded-md transition-colors duration-300 border
-                    ${themeClasses.btnPrimary(darkActive)}
-                  `}>
-                    LOGIN
+          <div className={`
+            md:hidden fixed inset-0 top-0 left-0 z-50 transition-all duration-300
+            ${darkActive ? 'bg-black/50' : 'bg-black/30'}
+          `}>
+            <div className={`
+              absolute top-0 right-0 h-full w-80 max-w-full transform transition-transform duration-300
+              ${themeClasses.bg(darkActive)}
+              ${themeClasses.shadow(darkActive)}
+            `}>
+              <div className="flex flex-col h-full">
+                <div className={`flex items-center justify-between p-6 border-b ${themeClasses.border(darkActive)}`}>
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src="/flowhome-logo.png" 
+                      alt="Logo FlowHome" 
+                      className={`w-10 h-10 object-contain ${themeClasses.logo(darkActive)}`} 
+                    />
+                    <span className="text-xl font-bold">Menu</span>
+                  </div>
+                  <button 
+                    onClick={toggleMenu}
+                    className={`p-2 rounded-lg transition-all duration-300 ${darkActive ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+                  >
+                    <FaXmark className="w-5 h-5" />
                   </button>
-                </NavLink>
-              </li>
-            </ul>
-          </nav>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-6 space-y-3">
+                  <MobileNavLink to="/" text="INÍCIO" icon={<FaHouse />} />
+                  <MobileNavLink to="/tarefas" text="TAREFAS" icon={<FaListCheck />} />
+                  <MobileNavLink to="/equipes" text="EQUIPES" icon={<FaUsers />} />
+                  <MobileNavLink to="/categorias" text="CATEGORIAS" icon={<FaFolder />} />
+                  <MobileNavLink to="/sobre" text="SOBRE" icon={<FaHouse />} />
+                  <MobileNavLink to="/integrantes" text="INTEGRANTES" icon={<FaUser />} />
+                </div>
+
+                <div className={`p-6 space-y-4 border-t ${themeClasses.border(darkActive)}`}>
+                  <button
+                    onClick={() => {
+                      switchTheme();
+                      setIsMenuOpen(false);
+                    }}
+                    className={`
+                      w-full flex items-center justify-center gap-3 p-4 rounded-xl transition-all duration-300
+                      ${themeClasses.btnSecondary(darkActive)}
+                    `}
+                  >
+                    {darkActive ? (
+                      <>
+                        <FaSun className="w-5 h-5" />
+                        <span className="font-medium">Tema Claro</span>
+                      </>
+                    ) : (
+                      <>
+                        <FaMoon className="w-5 h-5" />
+                        <span className="font-medium">Tema Escuro</span>
+                      </>
+                    )}
+                  </button>
+                  
+                  <NavLink to="/login" className="w-full" onClick={() => setIsMenuOpen(false)}>
+                    <button className={`
+                      w-full flex items-center justify-center gap-3 p-4 font-semibold rounded-xl transition-all duration-300 border
+                      ${themeClasses.btnPrimary(darkActive)}
+                    `}>
+                      <FaSignal className="w-5 h-5" />
+                      <span>ENTRAR</span>
+                    </button>
+                  </NavLink>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </header>
