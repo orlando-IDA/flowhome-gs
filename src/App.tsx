@@ -15,25 +15,15 @@ import PerfilPage from './pages/Perfil';
 import IntegranteDetail from './pages/IntegranteDetail';
 import CategoriasPage from './pages/Categorias';
 import Error404 from './pages/Error';
+import TarefasPage from './pages/Tarefas';
 
 function App() {
   return (
     <Routes>
-     
-      {/* Rotas Públicas: 
-        Qualquer um pode acessar.
-      */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="*" element={<Error404 />} />
 
-      {/* Rotas Protegidas:
-        O <ProtectedRoute> agora é o "pai". Ele vai checar o localStorage.
-        Se o usuário estiver logado, ele renderiza o <Outlet />, que 
-        são as rotas <Route> filhas abaixo.
-      */}
       <Route element={<ProtectedRoute />}>
-
-        {/* Grupo 1: Rotas que usam o MainLayout (navbar, etc.) */}
         <Route path="/" element={<MainLayout />}>
           <Route index element={<DashboardPage />} /> 
           <Route path="sobre" element={<SobrePage />} />
@@ -42,9 +32,10 @@ function App() {
           <Route path="integrantes" element={<IntegrantesPage />} />
           <Route path="/integrantes/:id" element={<IntegranteDetail />} />
           <Route path="categorias" element={<CategoriasPage />} />
+          <Route path="tarefas" element={<TarefasPage />} />
+          
         </Route>
 
-        {/* Grupo 2: Rotas protegidas que NÃO usam o MainLayout */}
         <Route path="/perfil" element={<PerfilPage />} />
 
       </Route>

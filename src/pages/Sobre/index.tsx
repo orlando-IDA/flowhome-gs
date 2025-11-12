@@ -7,7 +7,7 @@ const SobrePage = () => {
 
   return (
     <div className={`
-      min-h-screen transition-colors duration-300
+     transition-colors duration-300
       ${themeClasses.bg(darkActive)}
       ${themeClasses.text(darkActive)}
     `}>
