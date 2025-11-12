@@ -19,7 +19,8 @@ const Footer: React.FC = () => {
         <div className="flex flex-col items-center justify-center space-y-4">
           <div className="flex flex-col items-center">
             <h3 className="font-semibold mb-3">Flow Home</h3>
-            <div className="flex space-x-6">
+            <div className="flex flex-col items-center space-y-2 sm:flex-row sm:space-y-0 sm:space-x-6">
+   
               <NavLink 
                 to="/integrantes"
                 className={`
