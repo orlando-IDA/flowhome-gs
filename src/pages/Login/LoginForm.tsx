@@ -6,13 +6,14 @@ import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom'; 
 import { useAppTheme } from '../../context/useAppTheme';
 import { themeClasses } from '../../utils/themeUtils';
+import { useAuth } from '../../context/AuthContext';
 
 const loginSchema = z.object({
-  cpf: z.string().length(11, 'CPF deve conter exatamente 11 dígitos.'),
+  login: z.string().min(1, 'CPF ou E-mail é obrigatório.'),
   senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres.'),
 });
 
-type LoginSchema = z.infer<typeof loginSchema>;
+type LoginFormData = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
   onToggleView: () => void;
@@ -20,21 +21,33 @@ interface LoginFormProps {
 
 export function LoginForm({ onToggleView }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const { darkActive } = useAppTheme();
   const navigate = useNavigate(); 
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginSchema>({
+  const { login } = useAuth();
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      cpf: '',
+      login: '',
       senha: '',
     },
   });
 
-  const onSubmit = async (data: LoginSchema) => {
+  const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
-    console.log('Dados do Login (Apenas Validação):', data);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    navigate('/');
+    setApiError(null);
+
+    try {
+      await login(data);
+      navigate('/');
+
+    } catch (error: any) {
+      console.error('Erro no login:', error);
+      setApiError(error.message || 'Falha ao conectar. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -56,7 +69,7 @@ export function LoginForm({ onToggleView }: LoginFormProps) {
           mt-1 transition-colors duration-300
           ${themeClasses.textMuted(darkActive)}
         `}>
-          Insira seu CPF e senha para continuar.
+          Insira seu CPF ou E-mail para continuar.
         </p>
       </div>
       
@@ -64,25 +77,24 @@ export function LoginForm({ onToggleView }: LoginFormProps) {
         <div className="p-6 pt-0 space-y-4">
           <div className="space-y-2">
             <label 
-              htmlFor="cpf" 
+              htmlFor="login" 
               className={`
                 block text-sm font-medium transition-colors duration-300
                 ${themeClasses.text(darkActive)}
               `}
             >
-              CPF
+              CPF ou E-mail
             </label>
             <input
-              id="cpf"
+              id="login"
               type="text"
-              placeholder="000.000.000-00"
-              // AQUI ESTÁ A MUDANÇA - usando a nova função input
-              className={themeClasses.input(darkActive, !!errors.cpf)}
-              {...register("cpf")}
+              placeholder="seu.email@exemplo.com ou 12345678900"
+              className={themeClasses.input(darkActive, !!errors.login)}
+              {...register("login")}
             />
-            {errors.cpf && (
+            {errors.login && (
               <p className="text-sm font-medium text-red-600">
-                {errors.cpf.message}
+                {errors.login.message}
               </p>
             )}
           </div>
@@ -100,7 +112,6 @@ export function LoginForm({ onToggleView }: LoginFormProps) {
               id="senha"
               type="password"
               placeholder="••••••••"
-              // AQUI ESTÁ A MUDANÇA - usando a nova função input
               className={themeClasses.input(darkActive, !!errors.senha)}
               {...register("senha")}
             />
@@ -112,6 +123,12 @@ export function LoginForm({ onToggleView }: LoginFormProps) {
           </div>
         </div>
         <div className="px-6 pb-4 pt-0 flex flex-col gap-4">
+          {apiError && (
+            <p className="text-sm font-medium text-red-600 text-center">
+              {apiError}
+            </p>
+          )}
+          
           <button 
             type="submit" 
             className={`

@@ -5,18 +5,19 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useAppTheme } from '../../context/useAppTheme';
 import { themeClasses } from '../../utils/themeUtils';
+import { cadastrarUsuario } from '../../services/authService';
 
 const registerSchema = z.object({
   nome: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres.'),
   cpf: z.string().length(11, 'CPF deve conter exatamente 11 dígitos.'),
   email: z.string().email('Formato de e-mail inválido.'),
   telefone: z.string().min(10, 'Telefone deve ter no mínimo 10 dígitos.'),
-  dataNascimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use o formato AAAA-MM-DD'),
+  dtNascimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use o formato AAAA-MM-DD'),
   senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres.'),
   codigoEquipe: z.string().optional(),
 });
 
-type RegisterSchema = z.infer<typeof registerSchema>;
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 interface RegisterFormProps {
   onToggleView: () => void;
@@ -24,40 +25,40 @@ interface RegisterFormProps {
 
 export function RegisterForm({ onToggleView }: RegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const { darkActive } = useAppTheme();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<RegisterSchema>({
+  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       nome: '',
       cpf: '',
       email: '',
       telefone: '',
-      dataNascimento: '',
+      dtNascimento: '',
       senha: '',
       codigoEquipe: '',
     },
   });
 
-  const onSubmit = async (data: RegisterSchema) => {
+  const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
-    console.log('Dados do Cadastro (Visual):', data);
+    setApiError(null);
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      await cadastrarUsuario(data);
 
-    console.log('Simulação: Cadastro realizado! Voltando para o login.');
-    setIsLoading(false);
-    onToggleView(); 
+      console.log('Cadastro realizado! Voltando para o login.');
+      onToggleView(); 
+
+    } catch (error: any)
+    {
+      console.error('Erro no cadastro:', error);
+      setApiError(error.message || 'Falha ao conectar. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  const inputClass = (hasError: boolean) => `
-    flex h-10 w-full rounded-md border px-3 py-2 text-sm 
-    placeholder:text-neutral-500 
-    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-    ${hasError ? 'border-red-500 ring-red-500' : themeClasses.border(darkActive)}
-    ${themeClasses.bg(darkActive)}
-    ${themeClasses.text(darkActive)}
-  `;
 
   return (
     <div className={`
@@ -83,140 +84,101 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
       
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-4 max-h-[60vh] overflow-y-auto px-6 py-2">
+          {apiError && (
+            <p className="text-sm font-medium text-red-600 text-center">
+              {apiError}
+            </p>
+          )}
+
           <div className="space-y-2">
-            <label 
-              htmlFor="nome" 
-              className={`
-                block text-sm font-medium transition-colors duration-300
-                ${themeClasses.text(darkActive)}
-              `}
-            >
+            <label htmlFor="nome" className={`block text-sm font-medium ${themeClasses.text(darkActive)}`}>
               Nome Completo
             </label>
             <input
               id="nome"
               type="text"
               placeholder="Seu nome"
-              className={inputClass(!!errors.nome)}
+              className={themeClasses.input(darkActive, !!errors.nome)}
               {...register("nome")}
             />
             {errors.nome && <p className="text-sm font-medium text-red-600">{errors.nome.message}</p>}
           </div>
           <div className="space-y-2">
-            <label 
-              htmlFor="cpf" 
-              className={`
-                block text-sm font-medium transition-colors duration-300
-                ${themeClasses.text(darkActive)}
-              `}
-            >
+            <label htmlFor="cpf" className={`block text-sm font-medium ${themeClasses.text(darkActive)}`}>
               CPF
             </label>
             <input
               id="cpf"
               type="text"
               placeholder="Apenas números"
-              className={inputClass(!!errors.cpf)}
+              className={themeClasses.input(darkActive, !!errors.cpf)}
               {...register("cpf")}
             />
             {errors.cpf && <p className="text-sm font-medium text-red-600">{errors.cpf.message}</p>}
           </div>
           <div className="space-y-2">
-            <label 
-              htmlFor="email" 
-              className={`
-                block text-sm font-medium transition-colors duration-300
-                ${themeClasses.text(darkActive)}
-              `}
-            >
+            <label htmlFor="email" className={`block text-sm font-medium ${themeClasses.text(darkActive)}`}>
               E-mail
             </label>
             <input
               id="email"
               type="email"
               placeholder="seu.email@exemplo.com"
-              className={inputClass(!!errors.email)}
+              className={themeClasses.input(darkActive, !!errors.email)}
               {...register("email")}
             />
             {errors.email && <p className="text-sm font-medium text-red-600">{errors.email.message}</p>}
           </div>
           <div className="space-y-2">
-            <label 
-              htmlFor="telefone" 
-              className={`
-                block text-sm font-medium transition-colors duration-300
-                ${themeClasses.text(darkActive)}
-              `}
-            >
+            <label htmlFor="telefone" className={`block text-sm font-medium ${themeClasses.text(darkActive)}`}>
               Telefone
             </label>
             <input
               id="telefone"
               type="tel"
               placeholder="11912345678"
-              className={inputClass(!!errors.telefone)}
+              className={themeClasses.input(darkActive, !!errors.telefone)}
               {...register("telefone")}
             />
             {errors.telefone && <p className="text-sm font-medium text-red-600">{errors.telefone.message}</p>}
           </div>
           <div className="space-y-2">
-            <label 
-              htmlFor="dataNascimento" 
-              className={`
-                block text-sm font-medium transition-colors duration-300
-                ${themeClasses.text(darkActive)}
-              `}
-            >
+            <label htmlFor="dtNascimento" className={`block text-sm font-medium ${themeClasses.text(darkActive)}`}>
               Data de Nascimento
             </label>
             <input
-              id="dataNascimento"
+              id="dtNascimento"
               type="date"
-              className={inputClass(!!errors.dataNascimento)}
-              {...register("dataNascimento")}
+              className={themeClasses.input(darkActive, !!errors.dtNascimento)}
+              {...register("dtNascimento")}
             />
-            {errors.dataNascimento && <p className="text-sm font-medium text-red-600">{errors.dataNascimento.message}</p>}
+            {errors.dtNascimento && <p className="text-sm font-medium text-red-600">{errors.dtNascimento.message}</p>}
           </div>
           <div className="space-y-2">
-            <label 
-              htmlFor="senha" 
-              className={`
-                block text-sm font-medium transition-colors duration-300
-                ${themeClasses.text(darkActive)}
-              `}
-            >
+            <label htmlFor="senha" className={`block text-sm font-medium ${themeClasses.text(darkActive)}`}>
               Senha
             </label>
             <input
               id="senha"
               type="password"
               placeholder="Mínimo 6 caracteres"
-              className={inputClass(!!errors.senha)}
+              className={themeClasses.input(darkActive, !!errors.senha)}
               {...register("senha")}
             />
             {errors.senha && <p className="text-sm font-medium text-red-600">{errors.senha.message}</p>}
           </div>
           <div className="space-y-2">
-            <label 
-              htmlFor="codigoEquipe" 
-              className={`
-                block text-sm font-medium transition-colors duration-300
-                ${themeClasses.text(darkActive)}
-              `}
-            >
+            <label htmlFor="codigoEquipe" className={`block text-sm font-medium ${themeClasses.text(darkActive)}`}>
               Código da Equipe (Opcional)
             </label>
             <input
               id="codigoEquipe"
               type="text"
               placeholder="Ex: A4B9K"
-              className={inputClass(!!errors.codigoEquipe)}
+              className={themeClasses.input(darkActive, !!errors.codigoEquipe)}
               {...register("codigoEquipe")}
             />
-            <p className={`
-              text-sm transition-colors duration-300
-              ${themeClasses.textMuted(darkActive)}
-            `}>
+            <p className={`text-sm ${themeClasses.textMuted(darkActive)}`}>
               Se você vai criar uma equipe, deixe em branco.
             </p>
             {errors.codigoEquipe && <p className="text-sm font-medium text-red-600">{errors.codigoEquipe.message}</p>}
