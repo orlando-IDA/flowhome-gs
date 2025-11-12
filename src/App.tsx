@@ -13,6 +13,7 @@ import IntegrantesPage from './pages/Integrantes';
 import LoginPage from './pages/Login';
 import PerfilPage from './pages/Perfil';
 import IntegranteDetail from './pages/IntegranteDetail';
+import CategoriasPage from './pages/Categorias';
 import Error404 from './pages/Error';
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
           <Route path="faq" element={<FaqPage />} />
           <Route path="integrantes" element={<IntegrantesPage />} />
           <Route path="/integrantes/:id" element={<IntegranteDetail />} />
+          <Route path="categorias" element={<CategoriasPage />} />
         </Route>
 
         {/* Grupo 2: Rotas protegidas que NÃO usam o MainLayout */}
