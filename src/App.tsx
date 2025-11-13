@@ -1,7 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import MainLayout from './components/MainLayout';
 
-// 1. IMPORTAR O NOVO COMPONENTE
 import ProtectedRoute from './components/ProtectedRoute';
 
 // pages
@@ -16,6 +15,7 @@ import IntegranteDetail from './pages/IntegranteDetail';
 import CategoriasPage from './pages/Categorias';
 import Error404 from './pages/Error';
 import TarefasPage from './pages/Tarefas';
+import EquipesPage from './pages/Equipes';
 
 function App() {
   return (
@@ -33,6 +33,7 @@ function App() {
           <Route path="/integrantes/:id" element={<IntegranteDetail />} />
           <Route path="categorias" element={<CategoriasPage />} />
           <Route path="tarefas" element={<TarefasPage />} />
+          <Route path="equipes" element={<EquipesPage />} />
           
         </Route>
 
