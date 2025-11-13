@@ -48,7 +48,7 @@ const EquipesPage = () => {
                 idGestor: 0,
                 dtCriacao: ''
              });
-             setError("API GET.");
+             setError("API GET /equipe/{id} em falta para carregar detalhes completos.");
           }
         } catch (err: any) {
           setError(err.message || "Erro ao buscar dados da sua equipe.");
