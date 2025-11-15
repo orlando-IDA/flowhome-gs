@@ -38,7 +38,7 @@ async function handleEmptyResponse(response: Response) {
 }
 
 export async function getCategoriasPorUsuario(idUsuario: number): Promise<ICategoria[]> {
-  const response = await fetch(`${API_URL}/categoria/usuario/${idUsuario}`, {
+  const response = await fetch(`${API_URL}/categorias/usuario/${idUsuario}`, {
     method: 'GET',
   });
   return handleJsonResponse(response);
@@ -46,7 +46,7 @@ export async function getCategoriasPorUsuario(idUsuario: number): Promise<ICateg
 
 
 export async function createCategoria(data: ICategoriaCreate): Promise<ICategoria> {
-  const response = await fetch(`${API_URL}/categoria`, {
+  const response = await fetch(`${API_URL}/categorias`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ export async function createCategoria(data: ICategoriaCreate): Promise<ICategori
 }
 
 export async function updateCategoria(idCategoria: number, data: ICategoriaUpdate): Promise<ICategoria> {
-  const response = await fetch(`${API_URL}/categoria/${idCategoria}`, {
+  const response = await fetch(`${API_URL}/categorias/${idCategoria}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ export async function updateCategoria(idCategoria: number, data: ICategoriaUpdat
 }
 
 export async function deleteCategoria(idCategoria: number): Promise<void> {
-  const response = await fetch(`${API_URL}/categoria/${idCategoria}`, {
+  const response = await fetch(`${API_URL}/categorias/${idCategoria}`, {
     method: 'DELETE',
   });
   return handleEmptyResponse(response);

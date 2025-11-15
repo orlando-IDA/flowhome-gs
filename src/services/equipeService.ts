@@ -38,6 +38,10 @@ async function handleEmptyResponse(response: Response) {
   return; 
 }
 
+
+
+
+
 export async function createEquipe(data: IEquipeCreate): Promise<IEquipe> {
   const response = await fetch(`${API_URL}/equipe`, {
     method: 'POST',
@@ -80,3 +84,6 @@ export async function deleteEquipe(idEquipe: number): Promise<void> {
   });
   return handleEmptyResponse(response);
 }
+
+// REMOVIDA A FUNÇÃO 'getMembrosDaEquipe'
+// (Ela foi movida para authService.ts)

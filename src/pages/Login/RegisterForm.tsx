@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { useAppTheme } from '../../context/useAppTheme';
 import { themeClasses } from '../../utils/themeUtils';
 import { cadastrarUsuario } from '../../services/authService';
+import type { ICadastroRequest } from '../../types/usuarioType';
 
 const registerSchema = z.object({
   nome: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres.'),
@@ -14,7 +15,6 @@ const registerSchema = z.object({
   telefone: z.string().min(10, 'Telefone deve ter no mínimo 10 dígitos.'),
   dtNascimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use o formato AAAA-MM-DD'),
   senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres.'),
-  codigoEquipe: z.string().optional(),
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -37,7 +37,6 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
       telefone: '',
       dtNascimento: '',
       senha: '',
-      codigoEquipe: '',
     },
   });
 
@@ -46,7 +45,7 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
     setApiError(null);
 
     try {
-      await cadastrarUsuario(data);
+      await cadastrarUsuario(data as ICadastroRequest);
 
       console.log('Cadastro realizado! Voltando para o login.');
       onToggleView(); 
@@ -166,22 +165,6 @@ export function RegisterForm({ onToggleView }: RegisterFormProps) {
               {...register("senha")}
             />
             {errors.senha && <p className="text-sm font-medium text-red-600">{errors.senha.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="codigoEquipe" className={`block text-sm font-medium ${themeClasses.text(darkActive)}`}>
-              Código da Equipe (Opcional)
-            </label>
-            <input
-              id="codigoEquipe"
-              type="text"
-              placeholder="Ex: A4B9K"
-              className={themeClasses.input(darkActive, !!errors.codigoEquipe)}
-              {...register("codigoEquipe")}
-            />
-            <p className={`text-sm ${themeClasses.textMuted(darkActive)}`}>
-              Se você vai criar uma equipe, deixe em branco.
-            </p>
-            {errors.codigoEquipe && <p className="text-sm font-medium text-red-600">{errors.codigoEquipe.message}</p>}
           </div>
         </div>
         <div className="p-6 pt-6 flex flex-col gap-4">

@@ -2,16 +2,17 @@ export interface ICategoria {
   idCategoria: number;
   nome: string;
   corHex: string;
-  id_usuario: number; 
+  idUsuario: number; 
 }
 
 export interface ICategoriaCreate {
   nome: string;
-  cor_hex: string; 
-  id_usuario: number;
+  corHex: string;
+  idUsuario: number;
 }
 
 export interface ICategoriaUpdate {
   nome: string;
-  cor_hex: string; 
+  corHex: string;
+  idUsuario: number;
 }
