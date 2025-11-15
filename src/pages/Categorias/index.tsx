@@ -29,19 +29,38 @@ const CategoriasPage = () => {
   const [editCor, setEditCor] = useState('');
 
   useEffect(() => {
+    if (!user) {
+      setIsLoading(false);
+      return; 
+    }
+
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
     const carregarCategorias = async () => {
-      if (!user) return; 
       setIsLoading(true);
+      setError(null);
       try {
-        const dados = await getCategoriasPorUsuario(user.idUsuario);
-        setCategorias(dados);
+        const dados = await getCategoriasPorUsuario(user.idUsuario, signal);
+        if (!signal.aborted) {
+          setCategorias(dados);
+        }
       } catch (err: any) {
-        setError(err.message || 'Falha ao buscar categorias.');
+        if (!signal.aborted) {
+          setError(err.message || 'Falha ao buscar categorias.');
+        }
       } finally {
-        setIsLoading(false);
+        if (!signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
+
     carregarCategorias();
+
+    return () => {
+      abortController.abort();
+    };
   }, [user]); 
 
   const handleCriarCategoria = async (e: React.FormEvent) => {
@@ -145,7 +164,7 @@ const CategoriasPage = () => {
             type="text"
             value={novoNome}
             onChange={(e) => setNovoNome(e.target.value)}
-            placeholder="Ex: Trabalho, Pessoal..."
+            placeholder="Ex: Estudos FIAP"
             className={themeClasses.input(darkActive)}
           />
         </div>

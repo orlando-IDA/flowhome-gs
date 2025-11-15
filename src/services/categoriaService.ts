@@ -37,39 +37,44 @@ async function handleEmptyResponse(response: Response) {
   return; 
 }
 
-export async function getCategoriasPorUsuario(idUsuario: number): Promise<ICategoria[]> {
+export async function getCategoriasPorUsuario(idUsuario: number, signal?: AbortSignal): Promise<ICategoria[]> {
   const response = await fetch(`${API_URL}/categorias/usuario/${idUsuario}`, {
     method: 'GET',
+    signal: signal,
   });
-  return handleJsonResponse(response);
+  const data = await handleJsonResponse(response);
+  return data || []; 
 }
 
 
-export async function createCategoria(data: ICategoriaCreate): Promise<ICategoria> {
+export async function createCategoria(data: ICategoriaCreate, signal?: AbortSignal): Promise<ICategoria> {
   const response = await fetch(`${API_URL}/categorias`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
+    signal: signal,
   });
   return handleJsonResponse(response);
 }
 
-export async function updateCategoria(idCategoria: number, data: ICategoriaUpdate): Promise<ICategoria> {
+export async function updateCategoria(idCategoria: number, data: ICategoriaUpdate, signal?: AbortSignal): Promise<ICategoria> {
   const response = await fetch(`${API_URL}/categorias/${idCategoria}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
+    signal: signal,
   });
   return handleJsonResponse(response);
 }
 
-export async function deleteCategoria(idCategoria: number): Promise<void> {
+export async function deleteCategoria(idCategoria: number, signal?: AbortSignal): Promise<void> {
   const response = await fetch(`${API_URL}/categorias/${idCategoria}`, {
     method: 'DELETE',
+    signal: signal,
   });
   return handleEmptyResponse(response);
 }

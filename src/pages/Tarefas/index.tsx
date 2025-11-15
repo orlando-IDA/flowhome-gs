@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useAppTheme } from '../../context/useAppTheme';
 import { themeClasses } from '../../utils/themeUtils';
@@ -36,46 +36,80 @@ const TarefasPage = () => {
   const [tarefaEmEdicao, setTarefaEmEdicao] = useState<ITarefa | null>(null);
   const [editForm, setEditForm] = useState<Partial<ITarefaUpdate>>({});
 
-  useEffect(() => {
-    const carregarDados = async () => {
-      if (!user) return;
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        const [dadosTarefas, dadosCategorias] = await Promise.all([
-          getTarefasPorUsuario(user.idUsuario),
-          getCategoriasPorUsuario(user.idUsuario)
-        ]);
-        
-        setTarefas(dadosTarefas);
-        setCategorias(dadosCategorias);
+  const carregarDados = useCallback(async (signal?: AbortSignal) => {
+    if (!user?.idUsuario) {
+      setIsLoading(false);
+      return;
+    }
 
-        if (dadosCategorias.length > 0) {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const dadosCategorias = await getCategoriasPorUsuario(user.idUsuario, signal);
+      
+      if (!signal?.aborted) {
+        setCategorias(dadosCategorias);
+        if (dadosCategorias.length > 0 && !novaCategoriaId) {
           setNovaCategoriaId(dadosCategorias[0].idCategoria.toString());
         }
-        
-      } catch (err: any) {
-        setError(err.message || 'Falha ao buscar dados.');
-      } finally {
+      }
+
+      const dadosTarefas = await getTarefasPorUsuario(user.idUsuario, signal);
+      
+      if (!signal?.aborted) {
+        setTarefas(dadosTarefas);
+      }
+      
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        return;
+      }
+      
+      if (!signal?.aborted) {
+        setError(err.message || 'Falha ao buscar dados. Tente novamente.');
+      }
+    } finally {
+      if (!signal?.aborted) {
         setIsLoading(false);
       }
+    }
+  }, [user, novaCategoriaId]);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    carregarDados(signal);
+
+    return () => {
+      abortController.abort();
     };
+  }, [carregarDados]);
+
+  const recarregarDados = () => {
     carregarDados();
-  }, [user]);
+  };
 
   const handleCriarTarefa = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !novoTitulo || !novaCategoriaId) {
+    
+    if (!user || !novoTitulo.trim() || !novaCategoriaId) {
       setError("Título e Categoria são obrigatórios.");
       return;
     }
+    
+    if (categorias.length === 0) {
+      setError("Nenhuma categoria disponível. Crie uma categoria primeiro.");
+      return;
+    }
+
     setError(null);
 
     try {
       const payload = {
-        titulo: novoTitulo,
-        descricao: novaDescricao || null,
+        titulo: novoTitulo.trim(),
+        descricao: novaDescricao.trim() || null,
         idCategoria: parseInt(novaCategoriaId),
         dtVencimento: novaDataVencimento || null,
         tempoEstimadoH: novoTempoEstimado ? parseFloat(novoTempoEstimado) : null,
@@ -83,7 +117,7 @@ const TarefasPage = () => {
       };
       
       const novaTarefa = await createTarefa(payload);
-      setTarefas([novaTarefa, ...tarefas]);
+      setTarefas(prev => [novaTarefa, ...prev]);
       
       setNovoTitulo('');
       setNovaDescricao('');
@@ -91,7 +125,7 @@ const TarefasPage = () => {
       setNovoTempoEstimado('');
       
     } catch (err: any) {
-      setError(err.message || 'Erro ao criar tarefa.');
+      setError(err.message || 'Erro ao criar tarefa. Tente novamente.');
     }
   };
 
@@ -116,34 +150,40 @@ const TarefasPage = () => {
 
   const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setEditForm(prev => ({ ...prev, [name]: value }));
+    setEditForm(prev => ({ 
+      ...prev, 
+      [name]: name === 'idCategoria' || name === 'tempoEstimadoH' ? 
+        (value ? Number(value) : null) : value 
+    }));
   };
 
   const handleAtualizarTarefa = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tarefaEmEdicao || !editForm.titulo || !editForm.idCategoria || !editForm.status) {
+    if (!tarefaEmEdicao || !editForm.titulo || !editForm.idCategoria || !editForm.status || !user) {
+      setError("Preencha todos os campos obrigatórios.");
       return;
     }
 
     try {
       const payload: ITarefaUpdate = {
-        titulo: editForm.titulo,
-        descricao: editForm.descricao || null,
+        titulo: editForm.titulo.toString(),
+        descricao: editForm.descricao?.toString() || null,
         idCategoria: Number(editForm.idCategoria),
-        dtVencimento: editForm.dtVencimento || null,
+        dtVencimento: editForm.dtVencimento?.toString() || null,
         tempoEstimadoH: editForm.tempoEstimadoH ? Number(editForm.tempoEstimadoH) : null,
         status: editForm.status as StatusTarefa,
+        idUsuario: user.idUsuario,
       };
 
       const tarefaAtualizada = await updateTarefa(tarefaEmEdicao.idTarefa, payload);
       
-      setTarefas(tarefas.map(t => 
+      setTarefas(prev => prev.map(t => 
         t.idTarefa === tarefaAtualizada.idTarefa ? tarefaAtualizada : t
       ));
       
       fecharModalEdicao();
     } catch (err: any) {
-      setError(err.message || 'Erro ao atualizar tarefa.');
+      setError(err.message || 'Erro ao atualizar tarefa. Tente novamente.');
     }
   };
 
@@ -154,33 +194,63 @@ const TarefasPage = () => {
     
     try {
       await deleteTarefa(idTarefa);
-      setTarefas(tarefas.filter(t => t.idTarefa !== idTarefa));
+      setTarefas(prev => prev.filter(t => t.idTarefa !== idTarefa));
     } catch (err: any) {
-      setError(err.message || 'Erro ao excluir tarefa.');
+      setError(err.message || 'Erro ao excluir tarefa. Tente novamente.');
     }
+  };
+
+  const getCategoriaPorId = (idCategoria: number) => {
+    return categorias.find(cat => cat.idCategoria === idCategoria);
   };
 
   if (isLoading) {
     return (
-      <div className={`flex flex-col items-center justify-center p-8 ${themeClasses.bg(darkActive)} ${themeClasses.text(darkActive)}`}>
+      <div className={`flex flex-col items-center justify-center p-8 ${themeClasses.bg(darkActive)} ${themeClasses.text(darkActive)} min-h-96`}>
         <Loader2 className="w-8 h-8 animate-spin mb-2" />
         <p>Carregando tarefas...</p>
+        <button 
+          onClick={recarregarDados}
+          className={`mt-4 px-4 py-2 text-sm rounded-md ${themeClasses.btnSecondary(darkActive)}`}
+        >
+          Tentar Novamente
+        </button>
       </div>
     );
   }
 
   return (
-    <div className={`p-4 md:p-8 ${themeClasses.bg(darkActive)} ${themeClasses.text(darkActive)}`}>
+    <div className={`p-4 md:p-8 ${themeClasses.bg(darkActive)} ${themeClasses.text(darkActive)} min-h-screen`}>
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 md:mb-8">Minhas Tarefas</h1>
+        <div className="flex justify-between items-center mb-6 md:mb-8">
+          <h1 className="text-3xl font-bold">Minhas Tarefas</h1>
+          <button 
+            onClick={recarregarDados}
+            className={`px-4 py-2 text-sm rounded-md ${themeClasses.btnSecondary(darkActive)}`}
+          >
+            Recarregar
+          </button>
+        </div>
+
+        {error && (
+          <div className={`mb-6 p-4 rounded-lg border ${
+            darkActive ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'
+          }`}>
+            <p className="text-red-500 text-sm">{error}</p>
+            <button 
+              onClick={() => setError(null)}
+              className="mt-2 text-red-500 text-sm underline"
+            >
+              Fechar
+            </button>
+          </div>
+        )}
         
         <form 
           onSubmit={handleCriarTarefa}
           className={`mb-8 p-4 md:p-6 rounded-lg ${darkActive ? 'bg-gray-800' : 'bg-gray-50'} border ${themeClasses.border(darkActive)} shadow-sm`}
         >
           <h2 className="text-xl font-semibold mb-4">Nova Tarefa</h2>
-          
-          {error && <p className="text-red-500 text-sm mb-4 p-2 rounded bg-red-500/10">{error}</p>}
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-4">
@@ -193,6 +263,7 @@ const TarefasPage = () => {
                   onChange={(e) => setNovoTitulo(e.target.value)}
                   className={themeClasses.input(darkActive)}
                   placeholder="Digite o título da tarefa"
+                  required
                 />
               </div>
               <div>
@@ -202,13 +273,20 @@ const TarefasPage = () => {
                   value={novaCategoriaId}
                   onChange={(e) => setNovaCategoriaId(e.target.value)}
                   className={themeClasses.input(darkActive)}
+                  required
                 >
+                  <option value="">Selecione uma categoria</option>
                   {categorias.map(cat => (
                     <option key={cat.idCategoria} value={cat.idCategoria}>
                       {cat.nome}
                     </option>
                   ))}
                 </select>
+                {categorias.length === 0 && (
+                  <p className="text-xs text-orange-500 mt-1">
+                    Nenhuma categoria disponível. Crie uma categoria primeiro.
+                  </p>
+                )}
               </div>
             </div>
             <div className="space-y-4">
@@ -250,7 +328,12 @@ const TarefasPage = () => {
           </div>
           <button 
             type="submit" 
-            className={`flex items-center justify-center gap-2 px-6 py-3 mt-6 rounded-lg font-medium transition-colors ${themeClasses.btnPrimary(darkActive)}`}
+            disabled={!novoTitulo.trim() || !novaCategoriaId || categorias.length === 0}
+            className={`flex items-center justify-center gap-2 px-6 py-3 mt-6 rounded-lg font-medium transition-colors ${
+              (!novoTitulo.trim() || !novaCategoriaId || categorias.length === 0)
+                ? 'bg-gray-400 cursor-not-allowed'
+                : themeClasses.btnPrimary(darkActive)
+            }`}
           >
             <FaPlus className="w-4 h-4" />
             Criar Tarefa
@@ -260,68 +343,83 @@ const TarefasPage = () => {
         {tarefas.length === 0 ? (
           <div className={`text-center py-12 rounded-lg ${darkActive ? 'bg-gray-800' : 'bg-gray-50'}`}>
             <p className={`text-lg ${themeClasses.textMuted(darkActive)}`}>
-              Você ainda não tem nenhuma tarefa.
+              {categorias.length === 0 
+                ? "Crie uma categoria primeiro para adicionar tarefas."
+                : "Você ainda não tem nenhuma tarefa."
+              }
             </p>
           </div>
         ) : (
           <div className="grid gap-4 md:gap-6">
-            {tarefas.map((tarefa) => (
-              <div
-                key={tarefa.idTarefa}
-                className={`p-4 md:p-6 rounded-lg border transition-all hover:shadow-lg ${
-                  darkActive 
-                    ? 'bg-gray-800 hover:border-gray-600' 
-                    : 'bg-white hover:border-gray-300'
-                } ${themeClasses.border(darkActive)}`}
-              >
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <h3 className="text-lg font-semibold">{tarefa.titulo}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        tarefa.status === 'Concluída' 
-                          ? 'bg-green-500/20 text-green-600'
-                          : tarefa.status === 'Em Andamento'
-                          ? 'bg-yellow-500/20 text-yellow-600'
-                          : 'bg-gray-500/20 text-gray-600'
-                      }`}>
-                        {tarefa.status}
-                      </span>
+            {tarefas.map((tarefa) => {
+              const categoria = getCategoriaPorId(tarefa.idCategoria);
+              return (
+                <div
+                  key={tarefa.idTarefa}
+                  className={`p-4 md:p-6 rounded-lg border transition-all hover:shadow-lg ${
+                    darkActive 
+                      ? 'bg-gray-800 hover:border-gray-600' 
+                      : 'bg-white hover:border-gray-300'
+                  } ${themeClasses.border(darkActive)}`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <h3 className="text-lg font-semibold">{tarefa.titulo}</h3>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          tarefa.status === 'Concluída' 
+                            ? 'bg-green-500/20 text-green-600'
+                            : tarefa.status === 'Em Andamento'
+                            ? 'bg-yellow-500/20 text-yellow-600'
+                            : 'bg-gray-500/20 text-gray-600'
+                        }`}>
+                          {tarefa.status}
+                        </span>
+                      </div>
+                      
+                      {tarefa.descricao && (
+                        <p className={`mb-3 ${themeClasses.textMuted(darkActive)}`}>{tarefa.descricao}</p>
+                      )}
+                      
+                      <div className={`flex flex-wrap gap-4 text-sm ${themeClasses.textMuted(darkActive)}`}>
+                        {tarefa.dtVencimento && (
+                          <span>Vencimento: {new Date(tarefa.dtVencimento).toLocaleDateString('pt-BR')}</span>
+                        )}
+                        {tarefa.tempoEstimadoH && (
+                          <span>Tempo estimado: {tarefa.tempoEstimadoH}h</span>
+                        )}
+                        {categoria && (
+                          <span className="flex items-center gap-1">
+                            <div 
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: categoria.corHex }}
+                            />
+                            {categoria.nome}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     
-                    {tarefa.descricao && (
-                      <p className={`mb-3 ${themeClasses.textMuted(darkActive)}`}>{tarefa.descricao}</p>
-                    )}
-                    
-                    <div className={`flex flex-wrap gap-4 text-sm ${themeClasses.textMuted(darkActive)}`}>
-                      {tarefa.dtVencimento && (
-                        <span>Vencimento: {new Date(tarefa.dtVencimento).toLocaleDateString('pt-BR')}</span>
-                      )}
-                      {tarefa.tempoEstimadoH && (
-                        <span>Tempo estimado: {tarefa.tempoEstimadoH}h</span>
-                      )}
+                    <div className="flex gap-2 sm:flex-col sm:gap-1">
+                      <button 
+                        onClick={() => abrirModalEdicao(tarefa)}
+                        className="p-2 rounded-lg bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-colors"
+                        title="Editar"
+                      >
+                        <FaPencilAlt className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleExcluirTarefa(tarefa.idTarefa)}
+                        className="p-2 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 transition-colors"
+                        title="Excluir"
+                      >
+                        <FaTrash className="w-4 h-4" />
+                      </button>
                     </div>
-                  </div>
-                  
-                  <div className="flex gap-2 sm:flex-col sm:gap-1">
-                    <button 
-                      onClick={() => abrirModalEdicao(tarefa)}
-                      className="p-2 rounded-lg bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-colors"
-                      title="Editar"
-                    >
-                      <FaPencilAlt className="w-4 h-4" />
-                    </button>
-                    <button 
-                      onClick={() => handleExcluirTarefa(tarefa.idTarefa)}
-                      className="p-2 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 transition-colors"
-                      title="Excluir"
-                    >
-                      <FaTrash className="w-4 h-4" />
-                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -336,7 +434,7 @@ const TarefasPage = () => {
                   type="button"
                   onClick={fecharModalEdicao} 
                   className={`p-2 rounded-full transition-colors ${
-                    darkActive ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
+                    darkActive ? 'hover:bg-gray-700' : 'hover:bg-gray-600'
                   }`}
                 >
                   <FaTimes className="w-5 h-5" />

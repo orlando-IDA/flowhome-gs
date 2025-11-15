@@ -6,7 +6,6 @@ import type {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// --- Helpers de Resposta (Sem alteração) ---
 async function handleJsonResponse(response: Response) {
   if (!response.ok) {
     let errorData;
@@ -73,7 +72,8 @@ export async function getMembrosDaEquipe(idEquipe: number): Promise<IUserRespons
   const response = await fetch(`${API_URL}/usuarios/equipe/${idEquipe}`, {
     method: 'GET',
   });
-  return handleJsonResponse(response);
+  const data = await handleJsonResponse(response);
+  return data || []; 
 }
 
 export async function entrarNaEquipe(idUsuario: number, idEquipe: number): Promise<IUserResponse> {
