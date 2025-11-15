@@ -9,7 +9,7 @@ import { themeClasses } from '../../utils/themeUtils';
 import { useAuth } from '../../context/AuthContext';
 
 const loginSchema = z.object({
-  login: z.string().min(1, 'CPF ou E-mail é obrigatório.'),
+  email: z.string().email('Formato de e-mail inválido.'),
   senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres.'),
 });
 
@@ -25,11 +25,10 @@ export function LoginForm({ onToggleView }: LoginFormProps) {
   const { darkActive } = useAppTheme();
   const navigate = useNavigate(); 
   const { login } = useAuth();
-  
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      login: '',
+      email: '',
       senha: '',
     },
   });
@@ -69,7 +68,7 @@ export function LoginForm({ onToggleView }: LoginFormProps) {
           mt-1 transition-colors duration-300
           ${themeClasses.textMuted(darkActive)}
         `}>
-          Insira seu CPF ou E-mail para continuar.
+          Insira seu e-mail e senha para continuar.
         </p>
       </div>
       
@@ -77,24 +76,24 @@ export function LoginForm({ onToggleView }: LoginFormProps) {
         <div className="p-6 pt-0 space-y-4">
           <div className="space-y-2">
             <label 
-              htmlFor="login" 
+              htmlFor="email" 
               className={`
                 block text-sm font-medium transition-colors duration-300
                 ${themeClasses.text(darkActive)}
               `}
             >
-              CPF ou E-mail
+              E-mail
             </label>
             <input
-              id="login"
-              type="text"
-              placeholder="seu.email@exemplo.com ou 12345678900"
-              className={themeClasses.input(darkActive, !!errors.login)}
-              {...register("login")}
+              id="email"
+              type="email"
+              placeholder="seu.email@exemplo.com"
+              className={themeClasses.input(darkActive, !!errors.email)}
+              {...register("email")}
             />
-            {errors.login && (
+            {errors.email && (
               <p className="text-sm font-medium text-red-600">
-                {errors.login.message}
+                {errors.email.message}
               </p>
             )}
           </div>

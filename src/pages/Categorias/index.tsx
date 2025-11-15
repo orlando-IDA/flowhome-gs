@@ -28,33 +28,49 @@ const CategoriasPage = () => {
   const [editNome, setEditNome] = useState('');
   const [editCor, setEditCor] = useState('');
 
-  // --- READ ---
   useEffect(() => {
+    if (!user) {
+      setIsLoading(false);
+      return; 
+    }
+
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
     const carregarCategorias = async () => {
-      if (!user) return; 
       setIsLoading(true);
+      setError(null);
       try {
-        // O 'dados' aqui virá com 'corHex' (camelCase)
-        const dados = await getCategoriasPorUsuario(user.idUsuario);
-        setCategorias(dados);
+        const dados = await getCategoriasPorUsuario(user.idUsuario, signal);
+        if (!signal.aborted) {
+          setCategorias(dados);
+        }
       } catch (err: any) {
-        setError(err.message || 'Falha ao buscar categorias.');
+        if (!signal.aborted) {
+          setError(err.message || 'Falha ao buscar categorias.');
+        }
       } finally {
-        setIsLoading(false);
+        if (!signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
+
     carregarCategorias();
+
+    return () => {
+      abortController.abort();
+    };
   }, [user]); 
 
-  // --- CREATE ---
   const handleCriarCategoria = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !novoNome) return;
     try {
       const payload = {
         nome: novoNome,
-        cor_hex: novaCor,
-        id_usuario: user.idUsuario,
+        corHex: novaCor,
+        idUsuario: user.idUsuario,
       };
       const novaCategoria = await createCategoria(payload);
       setCategorias([...categorias, novaCategoria]);
@@ -77,17 +93,19 @@ const CategoriasPage = () => {
     setCategoriaEmEdicao(null);
   };
 
-  // --- UPDATE ---
   const handleAtualizarCategoria = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!categoriaEmEdicao) return;
+    if (!categoriaEmEdicao || !user) return;
 
     try {
       const payload = {
         nome: editNome,
-        cor_hex: editCor,
+        corHex: editCor,
+        idUsuario: user.idUsuario,
       };
+      
       const categoriaAtualizada = await updateCategoria(categoriaEmEdicao.idCategoria, payload);
+      
       setCategorias(categorias.map(c => 
         c.idCategoria === categoriaAtualizada.idCategoria ? categoriaAtualizada : c
       ));
@@ -98,7 +116,6 @@ const CategoriasPage = () => {
     }
   };
 
-  // --- DELETE ---
   const handleExcluirCategoria = async (idCategoria: number) => {
     if (!window.confirm("Tem certeza que deseja excluir esta categoria?")) {
       return;
@@ -112,10 +129,9 @@ const CategoriasPage = () => {
     }
   };
 
-
   if (isLoading) {
     return (
-      <div className={`container mx-auto p-4 text-center ${themeClasses.text(darkActive)}`}>
+      <div className={`container mx-auto p-4 text-center ${themeClasses.text(darkActive)} ${themeClasses.bg(darkActive)} min-h-screen`}>
         <Loader2 className="w-8 h-8 animate-spin inline-block" />
         <p>Carregando categorias...</p>
       </div>
@@ -127,15 +143,16 @@ const CategoriasPage = () => {
   }
 
   return (
-    <div className={`container mx-auto p-4 md:p-8 ${themeClasses.text(darkActive)}`}>
+    <div className={`container mx-auto p-4 md:p-8 ${themeClasses.text(darkActive)} ${themeClasses.bg(darkActive)} min-h-screen`}>
       <h1 className="text-3xl font-bold mb-6">Minhas Categorias</h1>
 
       <form 
         onSubmit={handleCriarCategoria} 
         className={`
           mb-8 p-4 rounded-lg flex flex-col md:flex-row gap-4 items-stretch md:items-end
-          ${darkActive ? 'bg-gray-800' : 'bg-gray-50'} 
+          ${themeClasses.bg(darkActive)} 
           ${themeClasses.border(darkActive)}
+          ${themeClasses.shadow(darkActive)}
         `}
       >
         <div className="flex-1">

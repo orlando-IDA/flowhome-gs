@@ -6,7 +6,7 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 import type { ILoginRequest, IUserResponse } from '../types/usuarioType';
-import { login as apiLogin, getUserById } from '../services/authService'; // Vamos assumir que 'getUserById' existe em authService
+import { login as apiLogin, getUsuarioById } from '../services/authService'; 
 
 interface IAuthContext {
   user: IUserResponse | null;
@@ -20,7 +20,7 @@ const AuthContext = createContext<IAuthContext | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<IUserResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); 
 
   useEffect(() => {
     const storedUser = localStorage.getItem('flowhome_user');
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem('flowhome_user');
       }
     }
-    setIsLoading(false); 
+    setIsLoading(false);
   }, []);
 
   const login = async (credentials: ILoginRequest) => {
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('flowhome_user', JSON.stringify(userData));
     } catch (error) {
       console.error("Erro no login:", error);
-      throw error; 
+      throw error;
     }
   };
 
@@ -54,12 +54,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const reloadUser = async (id: number) => {
     try {
-      const updatedUser = await getUserById(id); 
+      const updatedUser = await getUsuarioById(id); 
       setUser(updatedUser);
       localStorage.setItem('flowhome_user', JSON.stringify(updatedUser));
     } catch (error) {
       console.error("Falha ao recarregar dados do usuário", error);
-      logout(); 
+      logout();
     }
   }
 
