@@ -6,10 +6,13 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 import type { ILoginRequest, IUserResponse } from '../types/usuarioType';
+import type { IEquipe } from '../types/equipeType'; 
 import { login as apiLogin, getUsuarioById } from '../services/authService'; 
+import { getEquipePorId, getEquipesPorGestor } from '../services/equipeService'; 
 
 interface IAuthContext {
   user: IUserResponse | null;
+  minhaEquipe: IEquipe | null; 
   isLoading: boolean;
   login: (credentials: ILoginRequest) => Promise<void>;
   logout: () => void;
@@ -20,26 +23,55 @@ const AuthContext = createContext<IAuthContext | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<IUserResponse | null>(null);
+  const [minhaEquipe, setMinhaEquipe] = useState<IEquipe | null>(null);
   const [isLoading, setIsLoading] = useState(true); 
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('flowhome_user');
-    
-    if (storedUser) {
+  const fetchMinhaEquipe = async (usuario: IUserResponse) => {
+    if (usuario.idEquipe) {
       try {
-        setUser(JSON.parse(storedUser));
+        let equipeData: IEquipe | null = null;
+        if (usuario.isGestor) {
+          const equipesGestor = await getEquipesPorGestor(usuario.idUsuario);
+          equipeData = equipesGestor.find(e => e.idEquipe === usuario.idEquipe) || null;
+        } else {
+          equipeData = await getEquipePorId(usuario.idEquipe);
+        }
+        setMinhaEquipe(equipeData);
       } catch (error) {
-        console.error("Falha ao ler usuário do localStorage", error);
-        localStorage.removeItem('flowhome_user');
+        console.error("Falha ao buscar dados da equipe", error);
+        setMinhaEquipe(null); 
       }
+    } else {
+      setMinhaEquipe(null); 
     }
-    setIsLoading(false);
+  };
+
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      const storedUser = localStorage.getItem('flowhome_user');
+      
+      if (storedUser) {
+        try {
+          const parsedUser: IUserResponse = JSON.parse(storedUser);
+          setUser(parsedUser);
+          await fetchMinhaEquipe(parsedUser); 
+        } catch (error) {
+          console.error("Falha ao ler dados do localStorage", error);
+          localStorage.removeItem('flowhome_user');
+        }
+      }
+      setIsLoading(false);
+    };
+    
+    loadInitialData();
   }, []);
 
   const login = async (credentials: ILoginRequest) => {
     try {
       const userData = await apiLogin(credentials);
       setUser(userData);
+      await fetchMinhaEquipe(userData); 
       localStorage.setItem('flowhome_user', JSON.stringify(userData));
     } catch (error) {
       console.error("Erro no login:", error);
@@ -49,6 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     setUser(null);
+    setMinhaEquipe(null); 
     localStorage.removeItem('flowhome_user');
   };
 
@@ -56,6 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const updatedUser = await getUsuarioById(id); 
       setUser(updatedUser);
+      await fetchMinhaEquipe(updatedUser); 
       localStorage.setItem('flowhome_user', JSON.stringify(updatedUser));
     } catch (error) {
       console.error("Falha ao recarregar dados do usuário", error);
@@ -64,7 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, reloadUser }}>
+    <AuthContext.Provider value={{ user, minhaEquipe, isLoading, login, logout, reloadUser }}>
       {!isLoading && children}
     </AuthContext.Provider>
   );

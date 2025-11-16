@@ -2,87 +2,51 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useAppTheme } from '../../context/useAppTheme';
 import { themeClasses } from '../../utils/themeUtils';
-import {
-  getEquipesPorGestor,
-  createEquipe,
-  getEquipePorCodigo,
-  getEquipePorId
-} from '../../services/equipeService';
+import { createEquipe, getEquipePorCodigo } from '../../services/equipeService';
 import { getMembrosDaEquipe, entrarNaEquipe } from '../../services/authService'; 
-import type { IEquipe, IEquipeCreate } from '../../types/equipeType';
+import type { IEquipeCreate } from '../../types/equipeType';
 import type { IUserResponse } from '../../types/usuarioType';
 import { Loader2, Users, Copy, Check } from 'lucide-react';
 
 const EquipesPage = () => {
-  const { user, reloadUser } = useAuth();
+  const { user, minhaEquipe, reloadUser } = useAuth(); 
   const { darkActive } = useAppTheme();
-
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); 
   const [error, setError] = useState<string | null>(null);
-
-  const [minhaEquipe, setMinhaEquipe] = useState<IEquipe | null>(null);
   const [membros, setMembros] = useState<IUserResponse[]>([]);
-  
   const [nomeNovaEquipe, setNomeNovaEquipe] = useState('');
   const [codigoEquipe, setCodigoEquipe] = useState('');
-  
   const [hasCopied, setHasCopied] = useState(false);
-
-  const carregarDadosEquipe = useCallback(async (signal: AbortSignal) => {
-    if (!user) return;
-    
-    setError(null);
-    setMembros([]);
-    setMinhaEquipe(null);
-
-    if (!user.idEquipe) {
+  const carregarMembros = useCallback(async (signal: AbortSignal) => {
+    if (!minhaEquipe) {
       setIsLoading(false);
       return;
     }
 
+    setIsLoading(true);
+    setError(null);
     try {
-      let equipeAtual: IEquipe | null = null;
-
-      if (user.isGestor) {
-        const equipes = await getEquipesPorGestor(user.idUsuario, signal);
-        equipeAtual = equipes.find(e => e.idEquipe === user.idEquipe) || null;
-      } else {
-        equipeAtual = await getEquipePorId(user.idEquipe, signal);
+      const dadosMembros = await getMembrosDaEquipe(minhaEquipe.idEquipe, signal);
+      if (!signal.aborted) {
+        setMembros(dadosMembros);
       }
-
-      if (signal.aborted) return;
-
-      if (equipeAtual) {
-        setMinhaEquipe(equipeAtual);
-        const dadosMembros = await getMembrosDaEquipe(equipeAtual.idEquipe, signal);
-        if (!signal.aborted) {
-          setMembros(dadosMembros);
-        }
-      } else {
-        setError("Não foi possível encontrar sua equipe. Tente relogar.");
-        await reloadUser(user.idUsuario);
-      }
-      
     } catch (err: any) {
       if (err.name === 'AbortError') return;
-      setError(err.message || "Erro ao buscar dados da sua equipe.");
+      setError(err.message || "Erro ao buscar membros da equipe.");
     } finally {
       if (!signal.aborted) {
         setIsLoading(false);
       }
     }
-  }, [user, reloadUser]);
+  }, [minhaEquipe]);
 
   useEffect(() => {
     const abortController = new AbortController();
-    
-    setIsLoading(true);
-    carregarDadosEquipe(abortController.signal);
-
+    carregarMembros(abortController.signal);
     return () => {
       abortController.abort();
     };
-  }, [carregarDadosEquipe]);
+  }, [carregarMembros]);
 
   const handleCriarEquipe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,46 +64,30 @@ const EquipesPage = () => {
       };
 
       const abortController = new AbortController();
-      
-      // 1. CRIAR A EQUIPE
-      // 'novaEquipe' retorna com o codigoEquipe, mas SEM o idEquipe
       const novaEquipe = await createEquipe(payload, abortController.signal);
-
       if (!novaEquipe || !novaEquipe.codigoEquipe) {
         throw new Error("A criação da equipe falhou em retornar o código.");
       }
-
-      // 2. BUSCAR A EQUIPE PELO CÓDIGO (Para descobrir o ID)
-      // Precisamos do ID para poder entrar nela.
+      
       const equipeCompleta = await getEquipePorCodigo(
         novaEquipe.codigoEquipe, 
         abortController.signal
       );
 
-      if (!equipeCompleta || !equipeCompleta.idEquipe) {
-        throw new Error("A equipe recém-criada não pôde ser encontrada.");
-      }
-
-      // 3. ENTRAR NA EQUIPE
-      // Agora o gestor se associa à equipe que criou.
       await entrarNaEquipe(
         user.idUsuario, 
         equipeCompleta.idEquipe, 
         abortController.signal
       );
       
-      // 4. RECARREGAR O USUÁRIO
-      // Agora o reloadUser() vai trazer o user.idEquipe preenchido.
       await reloadUser(user.idUsuario); 
       setNomeNovaEquipe('');
       
     } catch (err: any) {
       if (err.name === 'AbortError') return;
       setError(err.message || "Erro ao criar ou entrar na equipe.");
-      setIsLoading(false); // Só paramos o loading se der erro
+      setIsLoading(false);
     }
-    // O 'setIsLoading(false)' principal é tratado pelo useEffect 
-    // quando o 'user' (recarregado) mudar.
   };
 
   const handleEntrarComCodigo = async (e: React.FormEvent) => {
@@ -158,6 +106,7 @@ const EquipesPage = () => {
       setCodigoEquipe('');
 
     } catch (err: any) {
+      if (err.name === 'AbortError') return;
       setError(err.message || "Código inválido ou equipe não encontrada.");
       setIsLoading(false);
     }
@@ -246,7 +195,7 @@ const EquipesPage = () => {
               </h3>
               <ul className="space-y-2">
                 {membros.map(membro => (
-                 <li 
+                  <li 
                     key={membro.idUsuario}
                     className={`p-3 rounded-md flex justify-between items-center ${darkActive ? 'bg-gray-800' : 'bg-gray-100'}`}
                   >
@@ -256,7 +205,7 @@ const EquipesPage = () => {
                         ? 'bg-blue-500/20 text-blue-500' 
                         : 'bg-gray-500/20 text-gray-500'
                     }`}>
-                      {(membro.isGestor || membro.idUsuario === minhaEquipe?.idGestor) 
+                      {(membro.isGestor || membro.idUsuario === minhaEquipe?.idGestor)
                         ? 'Gestor' 
                         : 'Membro'}
                     </span>

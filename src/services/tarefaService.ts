@@ -3,10 +3,16 @@ import type {
   ITarefaCreate, 
   ITarefaUpdate 
 } from '../types/tarefaType.ts';
+import type {IUsuarioStats, IMembroStats} from '../types/statsType.ts';
+
+
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-async function handleJsonResponse(response: Response) {
+async function handleJsonResponse(response: Response, signal?: AbortSignal) {
+  if (signal?.aborted) {
+    throw new DOMException('AbortError', 'AbortError');
+  }
   if (!response.ok) {
     let errorData;
     try {
@@ -23,7 +29,10 @@ async function handleJsonResponse(response: Response) {
   return response.json();
 }
 
-async function handleEmptyResponse(response: Response) {
+async function handleEmptyResponse(response: Response, signal?: AbortSignal) {
+  if (signal?.aborted) {
+    throw new DOMException('AbortError', 'AbortError');
+  }
   if (!response.ok) {
     let errorData;
     try {
@@ -42,7 +51,7 @@ export async function getTarefasPorUsuario(idUsuario: number, signal?: AbortSign
     method: 'GET',
     signal: signal,
   });
-  const data = await handleJsonResponse(response);
+  const data = await handleJsonResponse(response, signal);
   return data || [];
 }
 
@@ -55,7 +64,7 @@ export async function createTarefa(data: ITarefaCreate, signal?: AbortSignal): P
     body: JSON.stringify(data),
     signal: signal,
   });
-  return handleJsonResponse(response);
+  return handleJsonResponse(response, signal);
 }
 
 export async function updateTarefa(idTarefa: number, data: ITarefaUpdate, signal?: AbortSignal): Promise<ITarefa> {
@@ -67,7 +76,7 @@ export async function updateTarefa(idTarefa: number, data: ITarefaUpdate, signal
     body: JSON.stringify(data),
     signal: signal,
   });
-  return handleJsonResponse(response);
+  return handleJsonResponse(response, signal);
 }
 
 export async function deleteTarefa(idTarefa: number, signal?: AbortSignal): Promise<void> {
@@ -75,5 +84,23 @@ export async function deleteTarefa(idTarefa: number, signal?: AbortSignal): Prom
     method: 'DELETE',
     signal: signal,
   });
-  return handleEmptyResponse(response);
+  return handleEmptyResponse(response, signal);
+}
+
+export async function getStatsDoUsuario(idUsuario: number, signal?: AbortSignal): Promise<IUsuarioStats> {
+  const response = await fetch(`${API_URL}/tarefas/${idUsuario}/stats`, {
+    method: 'GET',
+    signal,
+  });
+  const data = await handleJsonResponse(response, signal);
+  return data;
+}
+
+export async function getStatsDaEquipe(idEquipe: number, signal?: AbortSignal): Promise<IMembroStats[]> {
+  const response = await fetch(`${API_URL}/tarefas/equipe/${idEquipe}/stats`, {
+    method: 'GET',
+    signal,
+  });
+  const data = await handleJsonResponse(response, signal);
+  return data || []; 
 }
