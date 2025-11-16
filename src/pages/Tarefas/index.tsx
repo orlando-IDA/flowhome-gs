@@ -9,6 +9,24 @@ import type { ICategoria } from '../../types/categoriaType';
 import { Loader2 } from 'lucide-react';
 import { FaPlus, FaTrash, FaPencilAlt, FaTimes } from 'react-icons/fa';
 
+
+// NOTA: Como corrigi o "pisca" do Spinner no React.StrictMode
+
+// Problema: O StrictMode monta/desmonta componentes em desenvolvimento,
+// fazendo o useEffect executar duas vezes e causando um "pisca" no spinner.
+
+// Solução: Usar AbortController para cancelar a primeira requisição.
+// - useEffect cria um AbortController e passa o signal para carregarDados
+// - Na desmontagem, aborta a requisição anterior
+// - finally só atualiza o estado se a requisição não foi abortada
+
+// PS: Chamadas sequenciais são intencionais para evitar bug no back-end, não sei se é o ideal,
+// mas assim funciona, o Back-end possui um bloco finally onde o mesmo fecha a conexão com o DB,
+// ou seja se duas requisições acontecem ao mesmo tempo podemos cair no bloco finally onde o mesmo
+// fecha a conexão antes da segunda requisição terminar de usar a conexão aberta.
+
+
+
 const formatarDataParaInput = (dataString?: string | null) => {
   if (!dataString) return '';
   try {
