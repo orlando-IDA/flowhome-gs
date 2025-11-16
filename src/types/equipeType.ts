@@ -8,10 +8,10 @@ export interface IEquipe {
 
 
 export interface IEquipeCreate {
-  nome_equipe: string; 
-  id_gestor: number;   
+  nomeEquipe: string; 
+  idGestor: number;   
 }
 
 export interface IEquipeUpdate {
-  nome_equipe: string; 
+  nomeEquipe: string; 
 }
