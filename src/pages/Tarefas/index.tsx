@@ -36,6 +36,7 @@ const TarefasPage = () => {
   const [tarefaEmEdicao, setTarefaEmEdicao] = useState<ITarefa | null>(null);
   const [editForm, setEditForm] = useState<Partial<ITarefaUpdate>>({});
 
+
   const carregarDados = useCallback(async (signal?: AbortSignal) => {
     if (!user?.idUsuario) {
       setIsLoading(false);
@@ -46,26 +47,27 @@ const TarefasPage = () => {
     setError(null);
     
     try {
-      const dadosCategorias = await getCategoriasPorUsuario(user.idUsuario, signal);
-      
-      if (!signal?.aborted) {
-        setCategorias(dadosCategorias);
-        if (dadosCategorias.length > 0 && !novaCategoriaId) {
-          setNovaCategoriaId(dadosCategorias[0].idCategoria.toString());
-        }
-      }
-
       const dadosTarefas = await getTarefasPorUsuario(user.idUsuario, signal);
-      
-      if (!signal?.aborted) {
-        setTarefas(dadosTarefas);
+      if (signal?.aborted) return; 
+      setTarefas(dadosTarefas);
+
+      const dadosCategorias = await getCategoriasPorUsuario(user.idUsuario, signal);
+      if (signal?.aborted) return; 
+      setCategorias(dadosCategorias);
+      if (dadosCategorias.length > 0) {
+        setNovaCategoriaId(currentId => {
+          if (!currentId) { 
+            return dadosCategorias[0].idCategoria.toString();
+          }
+          return currentId;
+        });
       }
       
     } catch (err: any) {
       if (err.name === 'AbortError') {
+        console.log("Fetch abortada (Strict Mode)");
         return;
       }
-      
       if (!signal?.aborted) {
         setError(err.message || 'Falha ao buscar dados. Tente novamente.');
       }
@@ -74,22 +76,16 @@ const TarefasPage = () => {
         setIsLoading(false);
       }
     }
-  }, [user, novaCategoriaId]);
+  }, [user]); 
 
   useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
-
     carregarDados(signal);
-
     return () => {
       abortController.abort();
     };
   }, [carregarDados]);
-
-  const recarregarDados = () => {
-    carregarDados();
-  };
 
   const handleCriarTarefa = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,34 +202,30 @@ const TarefasPage = () => {
 
   if (isLoading) {
     return (
-      <div className={`flex flex-col items-center justify-center p-8 ${themeClasses.bg(darkActive)} ${themeClasses.text(darkActive)} min-h-96`}>
+      <main className={`flex flex-col items-center justify-center p-8 ${themeClasses.bg(darkActive)} ${themeClasses.text(darkActive)} min-h-screen`}>
         <Loader2 className="w-8 h-8 animate-spin mb-2" />
         <p>Carregando tarefas...</p>
-        <button 
-          onClick={recarregarDados}
-          className={`mt-4 px-4 py-2 text-sm rounded-md ${themeClasses.btnSecondary(darkActive)}`}
-        >
-          Tentar Novamente
-        </button>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className={`p-4 md:p-8 ${themeClasses.bg(darkActive)} ${themeClasses.text(darkActive)} min-h-screen`}>
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6 md:mb-8">
-          <h1 className="text-3xl font-bold">Minhas Tarefas</h1>
-          <button 
-            onClick={recarregarDados}
-            className={`px-4 py-2 text-sm rounded-md ${themeClasses.btnSecondary(darkActive)}`}
-          >
-            Recarregar
-          </button>
+    <main className={`
+      min-h-screen py-12 transition-colors duration-300
+      ${themeClasses.bg(darkActive)}
+    `}>
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h1 className={`
+            text-3xl md:text-4xl font-bold mb-4
+            ${themeClasses.text(darkActive)}
+          `}>
+            Minhas Tarefas
+          </h1>
         </div>
 
         {error && (
-          <div className={`mb-6 p-4 rounded-lg border ${
+          <div className={`mb-8 max-w-2xl mx-auto p-4 rounded-lg border ${
             darkActive ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'
           }`}>
             <p className="text-red-500 text-sm">{error}</p>
@@ -248,9 +240,16 @@ const TarefasPage = () => {
         
         <form 
           onSubmit={handleCriarTarefa}
-          className={`mb-8 p-4 md:p-6 rounded-lg ${darkActive ? 'bg-gray-800' : 'bg-gray-50'} border ${themeClasses.border(darkActive)} shadow-sm`}
+          className={`
+            mb-12 p-6 md:p-8 rounded-xl border max-w-4xl mx-auto
+            ${themeClasses.bg(darkActive)}
+            ${themeClasses.border(darkActive)}
+            ${themeClasses.shadow(darkActive)}
+          `}
         >
-          <h2 className="text-xl font-semibold mb-4">Nova Tarefa</h2>
+          <h2 className={`text-xl font-semibold mb-4 ${themeClasses.text(darkActive)}`}>
+            Nova Tarefa
+          </h2>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-4">
@@ -341,7 +340,12 @@ const TarefasPage = () => {
         </form>
 
         {tarefas.length === 0 ? (
-          <div className={`text-center py-12 rounded-lg ${darkActive ? 'bg-gray-800' : 'bg-gray-50'}`}>
+          <div className={`
+            text-center mt-16 rounded-xl p-8 max-w-2xl mx-auto border
+            ${themeClasses.bg(darkActive)}
+            ${themeClasses.border(darkActive)}
+            ${themeClasses.shadow(darkActive)}
+          `}>
             <p className={`text-lg ${themeClasses.textMuted(darkActive)}`}>
               {categorias.length === 0 
                 ? "Crie uma categoria primeiro para adicionar tarefas."
@@ -350,22 +354,24 @@ const TarefasPage = () => {
             </p>
           </div>
         ) : (
-          <div className="grid gap-4 md:gap-6">
+          <div className="grid gap-4 md:gap-6 max-w-4xl mx-auto">
             {tarefas.map((tarefa) => {
               const categoria = getCategoriaPorId(tarefa.idCategoria);
               return (
                 <div
                   key={tarefa.idTarefa}
-                  className={`p-4 md:p-6 rounded-lg border transition-all hover:shadow-lg ${
-                    darkActive 
-                      ? 'bg-gray-800 hover:border-gray-600' 
-                      : 'bg-white hover:border-gray-300'
-                  } ${themeClasses.border(darkActive)}`}
+                  className={`
+                    p-6 rounded-xl border transition-all duration-300
+                    ${themeClasses.bg(darkActive)}
+                    ${themeClasses.border(darkActive)}
+                    ${themeClasses.shadow(darkActive)}
+                    hover:shadow-xl hover:scale-[1.02]
+                  `}
                 >
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <h3 className="text-lg font-semibold">{tarefa.titulo}</h3>
+                        <h3 className={`text-lg font-semibold ${themeClasses.text(darkActive)}`}>{tarefa.titulo}</h3>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           tarefa.status === 'Concluída' 
                             ? 'bg-green-500/20 text-green-600'
@@ -403,14 +409,24 @@ const TarefasPage = () => {
                     <div className="flex gap-2 sm:flex-col sm:gap-1">
                       <button 
                         onClick={() => abrirModalEdicao(tarefa)}
-                        className="p-2 rounded-lg bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-colors"
+                        className={`
+                          p-2 rounded-lg transition-all duration-200
+                          ${themeClasses.textMuted(darkActive)}
+                          hover:text-blue-600 hover:bg-gray-100
+                          ${darkActive ? 'dark:hover:text-blue-400 dark:hover:bg-gray-700' : ''}
+                        `}
                         title="Editar"
                       >
                         <FaPencilAlt className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => handleExcluirTarefa(tarefa.idTarefa)}
-                        className="p-2 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 transition-colors"
+                        className={`
+                          p-2 rounded-lg transition-all duration-200
+                          ${themeClasses.textMuted(darkActive)}
+                          hover:text-red-600 hover:bg-gray-100
+                          ${darkActive ? 'dark:hover:text-red-500 dark:hover:bg-gray-700' : ''}
+                        `}
                         title="Excluir"
                       >
                         <FaTrash className="w-4 h-4" />
@@ -422,134 +438,137 @@ const TarefasPage = () => {
             })}
           </div>
         )}
+      </div>
 
-        {isEditModalOpen && tarefaEmEdicao && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className={`w-full max-w-2xl rounded-xl shadow-2xl max-h-[95vh] overflow-hidden flex flex-col ${
-              darkActive ? 'bg-gray-800' : 'bg-white'
-            }`}>
-              <div className={`shrink-0 flex justify-between items-center p-6 border-b ${themeClasses.border(darkActive)}`}>
-                <h2 className="text-2xl font-bold">Editar Tarefa</h2>
-                <button 
-                  type="button"
-                  onClick={fecharModalEdicao} 
-                  className={`p-2 rounded-full transition-colors ${
-                    darkActive ? 'hover:bg-gray-700' : 'hover:bg-gray-600'
-                  }`}
-                >
-                  <FaTimes className="w-5 h-5" />
-                </button>
-              </div>
-              
-              <div className="flex-1 overflow-y-auto">
-                <form onSubmit={handleAtualizarTarefa} className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                    <div className="md:col-span-2">
-                      <label htmlFor="edit_titulo" className="block text-sm font-medium mb-2">Título*</label>
-                      <input 
-                        id="edit_titulo"
-                        name="titulo"
-                        type="text"
-                        value={editForm.titulo || ''}
-                        onChange={handleEditFormChange}
-                        className={themeClasses.input(darkActive)}
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="edit_categoria" className="block text-sm font-medium mb-2">Categoria*</label>
-                      <select 
-                        id="edit_categoria"
-                        name="idCategoria"
-                        value={editForm.idCategoria || ''}
-                        onChange={handleEditFormChange}
-                        className={themeClasses.input(darkActive)}
-                      >
-                        {categorias.map(cat => (
-                          <option key={cat.idCategoria} value={cat.idCategoria}>
-                            {cat.nome}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label htmlFor="edit_status" className="block text-sm font-medium mb-2">Status*</label>
-                      <select 
-                        id="edit_status"
-                        name="status"
-                        value={editForm.status || 'Pendente'}
-                        onChange={handleEditFormChange}
-                        className={themeClasses.input(darkActive)}
-                      >
-                        <option value="Pendente">Pendente</option>
-                        <option value="Em Andamento">Em Andamento</option>
-                        <option value="Concluída">Concluída</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label htmlFor="edit_data_vencimento" className="block text-sm font-medium mb-2">Data de Vencimento</label>
-                      <input 
-                        id="edit_data_vencimento"
-                        name="dtVencimento"
-                        type="date"
-                        value={editForm.dtVencimento || ''}
-                        onChange={handleEditFormChange}
-                        className={themeClasses.input(darkActive)}
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="edit_tempo_estimado" className="block text-sm font-medium mb-2">Tempo Estimado (horas)</label>
-                      <input 
-                        id="edit_tempo_estimado"
-                        name="tempoEstimadoH"
-                        type="number"
-                        step="0.5"
-                        min="0"
-                        value={editForm.tempoEstimadoH || ''}
-                        onChange={handleEditFormChange}
-                        placeholder="Ex: 1.5"
-                        className={themeClasses.input(darkActive)}
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label htmlFor="edit_descricao" className="block text-sm font-medium mb-2">Descrição</label>
-                      <textarea
-                        id="edit_descricao"
-                        name="descricao"
-                        value={editForm.descricao || ''}
-                        onChange={handleEditFormChange}
-                        rows={4}
-                        className={themeClasses.input(darkActive).replace('h-10', '')}
-                      />
-                    </div>
+      {isEditModalOpen && tarefaEmEdicao && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className={`
+            w-full max-w-2xl rounded-xl shadow-2xl max-h-[95vh] overflow-hidden flex flex-col 
+            ${themeClasses.bg(darkActive)}
+          `}>
+            <div className={`shrink-0 flex justify-between items-center p-6 border-b ${themeClasses.border(darkActive)}`}>
+              <h2 className={`text-2xl font-bold ${themeClasses.text(darkActive)}`}>
+                Editar Tarefa
+              </h2>
+              <button 
+                type="button"
+                onClick={fecharModalEdicao} 
+                className={`p-2 rounded-full transition-colors ${
+                  darkActive ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+                }`}
+              >
+                <FaTimes className={`w-5 h-5 ${themeClasses.text(darkActive)}`} />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto">
+              <form onSubmit={handleAtualizarTarefa} className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                  <div className="md:col-span-2">
+                    <label htmlFor="edit_titulo" className="block text-sm font-medium mb-2">Título*</label>
+                    <input 
+                      id="edit_titulo"
+                      name="titulo"
+                      type="text"
+                      value={editForm.titulo || ''}
+                      onChange={handleEditFormChange}
+                      className={themeClasses.input(darkActive)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="edit_categoria" className="block text-sm font-medium mb-2">Categoria*</label>
+                    <select 
+                      id="edit_categoria"
+                      name="idCategoria"
+                      value={editForm.idCategoria || ''}
+                      onChange={handleEditFormChange}
+                      className={themeClasses.input(darkActive)}
+                    >
+                      {categorias.map(cat => (
+                        <option key={cat.idCategoria} value={cat.idCategoria}>
+                          {cat.nome}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
-                  <div className={`flex flex-col sm:flex-row justify-end gap-3 pt-6 mt-4 border-t ${themeClasses.border(darkActive)}`}>
-                    <button 
-                      type="button" 
-                      onClick={fecharModalEdicao}
-                      className={`px-6 py-3 rounded-lg font-medium transition-colors ${themeClasses.btnSecondary(darkActive)}`}
+                  <div>
+                    <label htmlFor="edit_status" className="block text-sm font-medium mb-2">Status*</label>
+                    <select 
+                      id="edit_status"
+                      name="status"
+                      value={editForm.status || 'Pendente'}
+                      onChange={handleEditFormChange}
+                      className={themeClasses.input(darkActive)}
                     >
-                      Cancelar
-                    </button>
-                    <button 
-                      type="submit" 
-                      className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${themeClasses.btnPrimary(darkActive)}`}
-                    >
-                      Salvar Alterações
-                    </button>
+                      <option value="Pendente">Pendente</option>
+                      <option value="Em Andamento">Em Andamento</option>
+                      <option value="Concluída">Concluída</option>
+                    </select>
                   </div>
-                </form>
-              </div>
+
+                  <div>
+                    <label htmlFor="edit_data_vencimento" className="block text-sm font-medium mb-2">Data de Vencimento</label>
+                    <input 
+                      id="edit_data_vencimento"
+                      name="dtVencimento"
+                      type="date"
+                      value={editForm.dtVencimento || ''}
+                      onChange={handleEditFormChange}
+                      className={themeClasses.input(darkActive)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="edit_tempo_estimado" className="block text-sm font-medium mb-2">Tempo Estimado (horas)</label>
+                    <input 
+                      id="edit_tempo_estimado"
+                      name="tempoEstimadoH"
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      value={editForm.tempoEstimadoH || ''}
+                      onChange={handleEditFormChange}
+                      placeholder="Ex: 1.5"
+                      className={themeClasses.input(darkActive)}
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label htmlFor="edit_descricao" className="block text-sm font-medium mb-2">Descrição</label>
+                    <textarea
+                      id="edit_descricao"
+                      name="descricao"
+                      value={editForm.descricao || ''}
+                      onChange={handleEditFormChange}
+                      rows={4}
+                      className={themeClasses.input(darkActive).replace('h-10', '')}
+                    />
+                  </div>
+                </div>
+
+                <div className={`flex flex-col sm:flex-row justify-end gap-3 pt-6 mt-4 border-t ${themeClasses.border(darkActive)}`}>
+                  <button 
+                    type="button" 
+                    onClick={fecharModalEdicao}
+                    className={`px-6 py-3 rounded-lg font-medium transition-colors ${themeClasses.btnSecondary(darkActive)}`}
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    type="submit" 
+                    className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${themeClasses.btnPrimary(darkActive)}`}
+                  >
+                    Salvar Alterações
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </main>
   );
 };
 
