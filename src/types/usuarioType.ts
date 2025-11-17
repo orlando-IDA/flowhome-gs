@@ -25,3 +25,11 @@ export interface ICadastroRequest {
   senha: string;
 
 }
+
+export interface IUserUpdate {
+  nome: string;
+  cpf: string;
+  email: string;
+  telefone: string;
+  dtNascimento: string | null;
+}

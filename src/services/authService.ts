@@ -1,7 +1,7 @@
 import type { 
   ILoginRequest, 
   ICadastroRequest, 
-  IUserResponse 
+  IUserResponse
 } from '../types/usuarioType.ts';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -97,4 +97,24 @@ export async function sairDaEquipe(idUsuario: number, signal?: AbortSignal): Pro
     signal,
   });
   return handleJsonResponse(response, signal);
+}
+
+export async function updateUsuario(id: number, data: IUserResponse, signal?: AbortSignal): Promise<IUserResponse> {
+  const response = await fetch(`${API_URL}/usuarios/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+    signal,
+  });
+  return handleJsonResponse(response, signal);
+}
+
+export async function deleteUsuario(id: number, signal?: AbortSignal): Promise<void> {
+  const response = await fetch(`${API_URL}/usuarios/${id}`, {
+    method: 'DELETE',
+    signal,
+  });
+  return handleEmptyResponse(response, signal);
 }

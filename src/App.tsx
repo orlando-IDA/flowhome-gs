@@ -34,10 +34,10 @@ function App() {
           <Route path="categorias" element={<CategoriasPage />} />
           <Route path="tarefas" element={<TarefasPage />} />
           <Route path="equipes" element={<EquipesPage />} />
-          
+          <Route path="perfil" element={<PerfilPage />} />
         </Route>
 
-        <Route path="/perfil" element={<PerfilPage />} />
+        
 
       </Route>
     </Routes>
