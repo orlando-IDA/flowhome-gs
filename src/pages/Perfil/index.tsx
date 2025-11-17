@@ -6,6 +6,7 @@ import { themeClasses } from '../../utils/themeUtils';
 import { updateUsuario, deleteUsuario } from '../../services/authService';
 import type { IUserResponse } from '../../types/usuarioType'; 
 import { Loader2, Trash2 } from 'lucide-react';
+import { formatCPF, formatPhone, removeMask } from '../../utils/maskUtils';
 
 const formatarDataParaInput = (dataString?: string | null) => {
   if (!dataString) return '';
@@ -38,12 +39,29 @@ const PerfilPage = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = removeMask(e.target.value);
+    const formattedValue = formatCPF(rawValue);
+    
+    e.target.value = formattedValue;
+    setFormData(prev => ({ ...prev, cpf: rawValue.slice(0, 11) }));
+  };
+
+  const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = removeMask(e.target.value);
+    const formattedValue = formatPhone(rawValue);
+    
+    e.target.value = formattedValue;
+    setFormData(prev => ({ ...prev, telefone: rawValue.slice(0, 11) }));
+  };
+
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setIsLoading(true);
     setError(null);
     setSuccess(null);
+    
     const payload: IUserResponse = {
       ...user, 
       ...formData, 
@@ -158,9 +176,10 @@ const PerfilPage = () => {
                   id="cpf"
                   name="cpf"
                   type="text"
-                  value={formData.cpf}
-                  onChange={handleChange}
+                  value={formatCPF(formData.cpf || '')}
+                  onChange={handleCpfChange}
                   className={themeClasses.input(darkActive)}
+                  maxLength={14}
                 />
               </div>
               <div>
@@ -168,10 +187,11 @@ const PerfilPage = () => {
                 <input
                   id="telefone"
                   name="telefone"
-                  type="tel"
-                  value={formData.telefone}
-                  onChange={handleChange}
+                  type="text"
+                  value={formatPhone(formData.telefone || '')}
+                  onChange={handleTelefoneChange}
                   className={themeClasses.input(darkActive)}
+                  maxLength={15}
                 />
               </div>
             </div>
