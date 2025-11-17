@@ -5,8 +5,6 @@ import type {
 } from '../types/tarefaType.ts';
 import type {IUsuarioStats, IMembroStats} from '../types/statsType.ts';
 
-
-
 const API_URL = import.meta.env.VITE_API_URL;
 
 async function handleJsonResponse(response: Response, signal?: AbortSignal) {

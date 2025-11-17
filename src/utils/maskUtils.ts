@@ -19,13 +19,6 @@ export const formatPhone = (value: string): string => {
 };
 
 
-export const formatCEP = (value: string): string => {
-  const numbers = removeMask(value);
-  if (numbers.length <= 5) return numbers;
-  return `${numbers.slice(0, 5)}-${numbers.slice(5, 8)}`;
-};
-
-
 export const formatDate = (value: string): string => {
   const numbers = removeMask(value);
   if (numbers.length <= 2) return numbers;
@@ -62,9 +55,4 @@ export const validateCPF = (cpf: string): boolean => {
 export const validatePhone = (phone: string): boolean => {
   const cleanPhone = removeMask(phone);
   return cleanPhone.length >= 10 && cleanPhone.length <= 11;
-};
-
-export const validateCEP = (cep: string): boolean => {
-  const cleanCEP = removeMask(cep);
-  return cleanCEP.length === 8;
 };
