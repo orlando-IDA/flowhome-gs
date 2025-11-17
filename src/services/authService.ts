@@ -6,72 +6,63 @@ import type {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-async function handleJsonResponse(response: Response, signal?: AbortSignal) {
+async function handleResponse(response: Response, signal?: AbortSignal) {
   if (signal?.aborted) {
     throw new DOMException('AbortError', 'AbortError');
   }
+
   if (!response.ok) {
-    let errorData;
+    const errorText = await response.text();
+    let errorMessage;
+    
     try {
-      errorData = await response.json();
-    } catch (e) {
-      errorData = { message: response.statusText };
+      const errorData = JSON.parse(errorText);
+      errorMessage = errorData.message || errorData.error;
+    } catch {
+      errorMessage = errorText || response.statusText;
     }
-    throw new Error(errorData.message || `Erro ${response.status}`);
+    
+    if (response.status === 401) {
+      errorMessage = 'Email ou senha incorretos';
+    } else if (response.status === 404) {
+      errorMessage = 'Recurso não encontrado';
+    } else if (response.status >= 500) {
+      errorMessage = 'Erro no servidor. Tente novamente.';
+    }
+    
+    throw new Error(errorMessage || `Erro ${response.status}`);
   }
-  if (response.status === 204) {
-    return null;
-  }
+  
+  if (response.status === 204) return null;
   return response.json();
 }
 
-async function handleEmptyResponse(response: Response, signal?: AbortSignal) {
-  if (signal?.aborted) {
-    throw new DOMException('AbortError', 'AbortError');
-  }
-  if (!response.ok) {
-    let errorData;
-    try {
-      errorData = await response.json();
-    } catch (e) {
-      errorData = { message: response.statusText };
-    }
-    throw new Error(errorData.message || `Erro ${response.status}`);
-  }
-  return; 
-}
-
-
 export async function login(data: ILoginRequest, signal?: AbortSignal): Promise<IUserResponse> {
-  const response = await fetch(`${API_URL}/usuarios/login`, { 
+  const response = await fetch(`${API_URL}/usuarios/login`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
     signal,
   });
-  return handleJsonResponse(response, signal);
+  return handleResponse(response, signal);
 }
 
 export async function cadastrarUsuario(data: ICadastroRequest, signal?: AbortSignal): Promise<IUserResponse> {
-  const response = await fetch(`${API_URL}/usuarios`, { // Caminho corrigido
+  const response = await fetch(`${API_URL}/usuarios`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
     signal,
   });
-  return handleJsonResponse(response, signal);
+  return handleResponse(response, signal);
 }
 
 export async function getUsuarioById(id: number, signal?: AbortSignal): Promise<IUserResponse> {
-  const response = await fetch(`${API_URL}/usuarios/${id}`, { // Caminho corrigido
+  const response = await fetch(`${API_URL}/usuarios/${id}`, {
     method: 'GET',
     signal,
   });
-  return handleJsonResponse(response, signal);
+  return handleResponse(response, signal);
 }
 
 export async function getMembrosDaEquipe(idEquipe: number, signal?: AbortSignal): Promise<IUserResponse[]> {
@@ -79,8 +70,8 @@ export async function getMembrosDaEquipe(idEquipe: number, signal?: AbortSignal)
     method: 'GET',
     signal,
   });
-  const data = await handleJsonResponse(response, signal);
-  return data || []; 
+  const data = await handleResponse(response, signal);
+  return data || [];
 }
 
 export async function entrarNaEquipe(idUsuario: number, idEquipe: number, signal?: AbortSignal): Promise<IUserResponse> {
@@ -88,7 +79,7 @@ export async function entrarNaEquipe(idUsuario: number, idEquipe: number, signal
     method: 'PUT',
     signal,
   });
-  return handleJsonResponse(response, signal);
+  return handleResponse(response, signal);
 }
 
 export async function sairDaEquipe(idUsuario: number, signal?: AbortSignal): Promise<IUserResponse> {
@@ -96,19 +87,17 @@ export async function sairDaEquipe(idUsuario: number, signal?: AbortSignal): Pro
     method: 'DELETE',
     signal,
   });
-  return handleJsonResponse(response, signal);
+  return handleResponse(response, signal);
 }
 
 export async function updateUsuario(id: number, data: IUserResponse, signal?: AbortSignal): Promise<IUserResponse> {
   const response = await fetch(`${API_URL}/usuarios/${id}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
     signal,
   });
-  return handleJsonResponse(response, signal);
+  return handleResponse(response, signal);
 }
 
 export async function deleteUsuario(id: number, signal?: AbortSignal): Promise<void> {
@@ -116,5 +105,5 @@ export async function deleteUsuario(id: number, signal?: AbortSignal): Promise<v
     method: 'DELETE',
     signal,
   });
-  return handleEmptyResponse(response, signal);
+  await handleResponse(response, signal);
 }
