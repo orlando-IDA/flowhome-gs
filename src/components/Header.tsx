@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   FaListCheck, FaUsers, FaFolder, FaBars, FaXmark, FaMoon, FaSun,
-  FaHouse, FaUser, FaSignal 
+  FaHouse, FaUser, FaSignal, FaAddressCard, FaArrowRightToBracket
 } from 'react-icons/fa6';
 import { useAppTheme } from '../context/useAppTheme';
 import { themeClasses } from '../utils/themeUtils';
-import { useAuth } from '../context/AuthContext'; // 2. Importar o useAuth
+import { useAuth } from '../context/AuthContext';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -108,9 +108,14 @@ const Header: React.FC = () => {
             </button>
             {user ? (
               <>
-                <span className="font-medium text-sm text-right hidden lg:block">
+                <NavLink 
+                  to="/perfil" 
+                  className="font-medium text-sm text-right hidden lg:block hover:text-blue-500 transition-colors"
+                  title="Ver Perfil"
+                >
                   Olá, {user.nome.split(' ')[0]}
-                </span>
+                </NavLink>
+                
                 <button
                   onClick={handleLogout}
                   title="Sair"
@@ -119,7 +124,7 @@ const Header: React.FC = () => {
                     ${themeClasses.btnPrimary(darkActive)}
                   `}
                 >
-                  <FaHouse className="w-4 h-4" />
+                  <FaArrowRightToBracket className="w-4 h-4" /> 
                 </button>
               </>
             ) : (
@@ -157,7 +162,6 @@ const Header: React.FC = () => {
               <div className="flex flex-col h-full">
                 <div className={`flex items-center justify-between p-6 border-b ${themeClasses.border(darkActive)}`}>
                   <div className="flex items-center gap-3">
-                    {/* 6. Mostrar nome do usuário no menu mobile se logado */}
                     {user ? (
                       <span className="text-xl font-bold">Olá, {user.nome.split(' ')[0]}</span>
                     ) : (
@@ -174,6 +178,9 @@ const Header: React.FC = () => {
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-3">
                   <MobileNavLink to="/" text="INÍCIO" icon={<FaHouse />} />
+                  {user && (
+                    <MobileNavLink to="/perfil" text="MEU PERFIL" icon={<FaAddressCard />} />
+                  )}
                   <MobileNavLink to="/tarefas" text="TAREFAS" icon={<FaListCheck />} />
                   <MobileNavLink to="/equipes" text="EQUIPES" icon={<FaUsers />} />
                   <MobileNavLink to="/categorias" text="CATEGORIAS" icon={<FaFolder />} />
@@ -212,7 +219,7 @@ const Header: React.FC = () => {
                         ${themeClasses.btnPrimary(darkActive)}
                       `}
                     >
-                      <FaHouse className="w-5 h-5" />
+                      <FaArrowRightToBracket className="w-5 h-5" />
                       <span>SAIR</span>
                     </button>
                   ) : (
