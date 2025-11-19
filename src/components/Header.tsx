@@ -189,6 +189,7 @@ const Header: React.FC = () => {
                   <MobileNavLink to="/categorias" text="CATEGORIAS" icon={<FaFolder />} />
                   <MobileNavLink to="/sobre" text="SOBRE" icon={<FaHouse />} />
                   <MobileNavLink to="/integrantes" text="INTEGRANTES" icon={<FaUser />} />
+                  <MobileNavLink to="/contato" text="CONTATO" icon={<FaPhone />} />
                 </div>
 
                 <div className={`p-6 space-y-4 border-t ${themeClasses.border(darkActive)}`}>
