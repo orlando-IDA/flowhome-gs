@@ -1,8 +1,12 @@
-const ContatoPage = () => {
+import { useNavigate } from "react-router-dom";
+import { Mail, Phone } from "lucide-react";
+import { useAppTheme } from '../../context/useAppTheme';
+import { themeClasses } from '../../utils/themeUtils';
+
+const Contact = () => {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Contato (FlowHome)</h1>
-    </div>
+    <div>Contact Component</div>
   );
 };
-export default ContatoPage;
+
+export default Contact;
