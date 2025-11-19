@@ -9,9 +9,7 @@ const Contact = () => {
 
   return (
     <div className={`min-h-screen w-full transition-colors duration-300 flex flex-col ${themeClasses.bg(darkActive)}`}>
-      
       <div className="container mx-auto px-4 py-8 max-w-5xl flex-1 flex flex-col items-center justify-center -mt-32"> 
-        
         <div className="text-center mb-20 max-w-2xl">
             <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${themeClasses.text(darkActive)}`}>
               Entre em Contato
@@ -22,7 +20,6 @@ const Contact = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 w-full max-w-3xl">
-            
             <div className={`flex flex-col items-center text-center p-8 rounded-xl border transition-all duration-300 hover:-translate-y-1
               ${themeClasses.bg(darkActive)} 
               ${themeClasses.border(darkActive)} 
@@ -59,8 +56,13 @@ const Contact = () => {
               <p className={`text-sm mb-4 ${themeClasses.textMuted(darkActive)}`}>
                 Ligue para nós (Horário Comercial)
               </p>
+              <a 
+                href="tel:+5512999999999" 
+                className="text-blue-500 font-semibold hover:underline text-lg"
+              >
+                +55 (11) 99999-9999
+              </a>
             </div>
-
         </div>
       </div>
     </div>
