@@ -7,7 +7,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import DashboardPage from './pages/Dashboard';
 import SobrePage from './pages/Sobre';
 import ContatoPage from './pages/Contato';
-import FaqPage from './pages/FAQ';
 import IntegrantesPage from './pages/Integrantes';
 import LoginPage from './pages/Login';
 import PerfilPage from './pages/Perfil';
