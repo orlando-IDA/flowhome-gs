@@ -8,7 +8,7 @@ import {
 import { useAppTheme } from '../context/useAppTheme';
 import { themeClasses } from '../utils/themeUtils';
 import { useAuth } from '../context/AuthContext';
-import { Phone } from 'lucide-react';
+
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
