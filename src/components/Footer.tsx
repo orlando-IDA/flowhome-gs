@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaGithub, FaUsers, FaEnvelope, FaQuestion } from 'react-icons/fa6';
+import { FaGithub, FaUsers,FaPhone } from 'react-icons/fa6';
 import { useAppTheme } from '../context/useAppTheme';
 import { themeClasses } from '../utils/themeUtils';
 
@@ -40,19 +40,8 @@ const Footer: React.FC = () => {
                   hover:text-blue-500
                 `}
               >
-                <FaEnvelope className="w-4 h-4" />
+                <FaPhone className="w-4 h-4" />
                 <span className="text-sm">Contato</span>
-              </NavLink>
-              <NavLink 
-                to="/faq"
-                className={`
-                  flex items-center space-x-2 transition-colors duration-300
-                  ${themeClasses.textMuted(darkActive)}
-                  hover:text-blue-500
-                `}
-              >
-                <FaQuestion className="w-4 h-4" />
-                <span className="text-sm">FAQ</span>
               </NavLink>
               <a 
                 href="https://github.com/orlando-IDA/flowhome-gs"

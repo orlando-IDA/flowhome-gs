@@ -28,7 +28,6 @@ function App() {
           <Route index element={<DashboardPage />} /> 
           <Route path="sobre" element={<SobrePage />} />
           <Route path="contato" element={<ContatoPage />} />
-          <Route path="faq" element={<FaqPage />} />
           <Route path="integrantes" element={<IntegrantesPage />} />
           <Route path="/integrantes/:id" element={<IntegranteDetail />} />
           <Route path="categorias" element={<CategoriasPage />} />
