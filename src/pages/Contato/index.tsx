@@ -16,11 +16,11 @@ const Contact = () => {
             <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${themeClasses.text(darkActive)}`}>
               Entre em Contato
             </h1>
-            
             <p className={`text-lg ${themeClasses.textMuted(darkActive)}`}>
               Tem dúvidas ou sugestões sobre o FlowHome? Adoraríamos ouvir você.
             </p>
         </div>
+
         <div className="grid md:grid-cols-2 gap-6 w-full max-w-3xl">
             
             <div className={`flex flex-col items-center text-center p-8 rounded-xl border transition-all duration-300 hover:-translate-y-1
@@ -43,6 +43,22 @@ const Contact = () => {
               >
                 flowhome@email.com
               </a>
+            </div>
+
+            <div className={`flex flex-col items-center text-center p-8 rounded-xl border transition-all duration-300 hover:-translate-y-1
+              ${themeClasses.bg(darkActive)} 
+              ${themeClasses.border(darkActive)} 
+              ${themeClasses.shadow(darkActive)}`}
+            >
+              <div className="p-4 rounded-full bg-green-500/10 mb-4">
+                <Phone className="h-8 w-8 text-green-500" />
+              </div>
+              <h3 className={`text-xl font-bold mb-1 ${themeClasses.text(darkActive)}`}>
+                Telefone
+              </h3>
+              <p className={`text-sm mb-4 ${themeClasses.textMuted(darkActive)}`}>
+                Ligue para nós (Horário Comercial)
+              </p>
             </div>
 
         </div>
