@@ -4,8 +4,13 @@ import { useAppTheme } from '../../context/useAppTheme';
 import { themeClasses } from '../../utils/themeUtils';
 
 const Contact = () => {
+  const navigate = useNavigate();
+  const { darkActive } = useAppTheme(); 
+
   return (
-    <div>Contact Component</div>
+    <div className={`min-h-screen w-full transition-colors duration-300 flex flex-col ${themeClasses.bg(darkActive)}`}>
+    
+    </div>
   );
 };
 
