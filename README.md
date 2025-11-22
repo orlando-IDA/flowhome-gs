@@ -53,7 +53,7 @@ O projeto foi desenvolvido utilizando as mais modernas tecnologias de desenvolvi
 * **Estilização:** TailwindCSS (Design Responsivo)
 * **Roteamento:** React Router DOM
 * **Gerenciamento de Estado:** React Context API (AuthProvider)
-* **Integração:** Fetch API / Axios
+* **Integração:** Fetch API
 * **Backend:** Java com Quarkus e Banco Oracle
 
 ---
