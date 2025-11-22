@@ -41,7 +41,7 @@ Acesse o projeto e a documentação através dos links abaixo:
 * **Deploy (API Java - Render):** `https://flowhome-gs.onrender.com`
 * **Repositório (GitHub Front-end):** `https://github.com/orlando-IDA/flowhome-gs`
 * **Repositório (GitHub Back-end):** `https://github.com/ggabmartins/flowhome-gs`
-* **Vídeo Pitch (YouTube):** `[LINK DO VIDEO AQUI]`
+* **Vídeo(YouTube):** `https://youtu.be/P-3SEy2urh0`
 
 ---
 
@@ -113,7 +113,7 @@ Para rodar este projeto localmente, siga os passos abaixo:
     ```bash
     npm run dev
     ```
-    A aplicação estará disponível em `http://localhost:5173`.
+    A aplicação estará disponível em `http://localhost:5174`.
 
 ---
 
