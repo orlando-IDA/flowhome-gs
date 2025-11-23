@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   FaListCheck, FaUsers, FaFolder, FaBars, FaXmark, FaMoon, FaSun,
-  FaHouse, FaUser, FaSignal, FaAddressCard, FaArrowRightToBracket
+  FaHouse, FaUser, FaSignal, FaAddressCard, FaArrowRightToBracket,
+  FaPhone
 } from 'react-icons/fa6';
 import { useAppTheme } from '../context/useAppTheme';
 import { themeClasses } from '../utils/themeUtils';
 import { useAuth } from '../context/AuthContext';
+
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -94,6 +96,7 @@ const Header: React.FC = () => {
               <li><NavLinkIcon to="/categorias" text="CATEGORIAS" icon={<FaFolder />} /></li>
               <li><NavLinkIcon to="/sobre" text="SOBRE" icon={<FaHouse />} /></li>
               <li><NavLinkIcon to="/integrantes" text="INTEGRANTES" icon={<FaUser />} /></li>
+              <li><NavLinkIcon to="/contato" text="CONTATO" icon={<FaPhone />} /></li>
             </ul>
             
             <button
@@ -186,6 +189,7 @@ const Header: React.FC = () => {
                   <MobileNavLink to="/categorias" text="CATEGORIAS" icon={<FaFolder />} />
                   <MobileNavLink to="/sobre" text="SOBRE" icon={<FaHouse />} />
                   <MobileNavLink to="/integrantes" text="INTEGRANTES" icon={<FaUser />} />
+                  <MobileNavLink to="/contato" text="CONTATO" icon={<FaPhone />} />
                 </div>
 
                 <div className={`p-6 space-y-4 border-t ${themeClasses.border(darkActive)}`}>
