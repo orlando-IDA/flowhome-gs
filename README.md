@@ -12,7 +12,7 @@ O **FlowHome** é uma solução digital inovadora focada no **Futuro do Trabalho
 
 Acesse o projeto e a documentação através dos links abaixo:
 
-* **Deploy (Vercel):** https://flowhome.vercel.app/
+* **Deploy (Vercel):** https://flowhomegs.vercel.app/
 * **Deploy (API Java - Render):** https://flowhome-gs.onrender.com
 * **Repositório (GitHub Front-end):** https://github.com/orlando-IDA/flowhome-gs
 * **Repositório (GitHub Back-end):** https://github.com/ggabmartins/flowhome-gs
@@ -97,7 +97,7 @@ Para rodar este projeto localmente, siga os passos abaixo:
 
 A aplicação está disponível publicamente para acesso imediato.
 
-### 🔗 **URL da Aplicação:** https://flowhome.vercel.app
+### 🔗 **URL da Aplicação:** https://flowhomegs.vercel.app/
 
 **Passo a passo:**
 1.  Acesse o link acima.
